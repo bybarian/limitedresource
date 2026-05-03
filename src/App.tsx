@@ -1048,15 +1048,15 @@ const EvaluationDashboard = () => {
                 <h3 className="text-xl font-black mb-6">實戰表現統計</h3>
                 <div className="space-y-8">
                   <div>
-                    <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">首次工作坊得分 (Baseline)</div>
+                    <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">首次工作坊得分</div>
                     <div className="text-3xl font-black text-white/60">{calculateTotal(firstScores).toFixed(1)} <span className="text-sm font-bold text-white/20">/ {firstMax.toFixed(1)}</span></div>
                   </div>
                   <div>
-                    <div className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">演練一得分 (Ex 1)</div>
+                    <div className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">演練一得分</div>
                     <div className="text-3xl font-black">{calculateTotal(ex1Scores).toFixed(1)} <span className="text-sm font-bold text-white/40">/ {ex1Max.toFixed(1)}</span></div>
                   </div>
                   <div>
-                    <div className="text-[10px] font-black text-medical-blue uppercase tracking-widest mb-2">演練二得分 (Ex 2)</div>
+                    <div className="text-[10px] font-black text-medical-blue uppercase tracking-widest mb-2">演練二得分</div>
                     <div className="text-4xl font-black text-medical-blue">{calculateTotal(ex2Scores).toFixed(1)} <span className="text-sm font-bold text-medical-blue/40">/ {ex2Max.toFixed(1)}</span></div>
                   </div>
                   <div className="pt-6 border-t border-white/10 italic text-[11px] text-white/60 leading-relaxed">
@@ -1083,13 +1083,13 @@ const EvaluationDashboard = () => {
                     onClick={() => setActiveWorkshop('first')}
                     className={`px-8 py-2.5 rounded-xl text-xs font-black transition-all ${activeWorkshop === 'first' ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400 hover:bg-slate-50 border border-slate-100'}`}
                    >
-                     首次工作坊 (基礎)
+                     首次工作坊
                    </button>
                    <button 
                     onClick={() => setActiveWorkshop('followup')}
                     className={`px-8 py-2.5 rounded-xl text-xs font-black transition-all ${activeWorkshop === 'followup' ? 'bg-medical-blue text-white shadow-lg' : 'bg-white text-slate-400 hover:bg-slate-50 border border-slate-100'}`}
                    >
-                     追蹤工作坊 (進階)
+                     追蹤工作坊
                    </button>
                  </div>
               </div>
@@ -1116,8 +1116,8 @@ const EvaluationDashboard = () => {
               ) : (
                 <div className="flex items-center gap-2 justify-center">
                   {[
-                    { id: 'ex1', label: '實戰演練一 (重傷處置)' },
-                    { id: 'ex2', label: '實戰演練二 (檢傷與中傷)' },
+                    { id: 'ex1', label: '演練一' },
+                    { id: 'ex2', label: '演練二' },
                   ].map((tab) => (
                     <button
                       key={tab.id}
