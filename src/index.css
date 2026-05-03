@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=ZCOOL+KuaiLe&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Noto Sans TC", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "ZCOOL+KuaiLe", cursive;
+  
+  --color-medical-bg: #fdfcf0;
+  --color-medical-blue: #7d8da1;
+  --color-medical-green: #8db596;
+  --color-medical-red: #d68060;
+  --color-medical-yellow: #e9c46a;
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-medical-bg text-slate-800;
+    background-image: radial-gradient(#e5e7eb 0.5px, transparent 0.5px);
+    background-size: 24px 24px;
+  }
+}
+
+.watercolor-blue {
+  background: linear-gradient(135deg, #7d8da1 0%, #5d6d81 100%);
+  @apply shadow-lg shadow-blue-900/10;
+}
+
+.watercolor-card {
+  @apply bg-white/90 backdrop-blur-sm border border-slate-200/50 rounded-3xl shadow-sm;
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+}
+
+.section-title {
+  @apply relative inline-block;
+}
+
+.section-title::after {
+  content: '';
+  @apply absolute -bottom-1 left-0 w-full h-3 bg-medical-green/20 -z-10 rounded-full;
+}
