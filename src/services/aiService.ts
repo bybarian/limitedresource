@@ -1,6 +1,22 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const getApiKey = () => {
+  try {
+    return process.env.GEMINI_API_KEY || '';
+  } catch {
+    return '';
+  }
+};
+
+let genAI: GoogleGenAI | null = null;
+
+const getAI = () => {
+  if (genAI) return genAI;
+  const key = getApiKey();
+  if (!key) throw new Error("GEMINI_API_KEY is not configured");
+  genAI = new GoogleGenAI(key);
+  return genAI;
+};
 
 export interface RadarPoint {
   milestone: string;
@@ -54,7 +70,8 @@ ${JSON.stringify(milestoneMap, null, 2)}
 `;
 
   try {
-    const response = await ai.models.generateContent({
+    const genAIInstance = getAI();
+    const response = await genAIInstance.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
       config: {

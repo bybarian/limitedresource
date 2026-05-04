@@ -606,9 +606,13 @@ const EvaluationDashboard = () => {
         const savedFirst = localStorage.getItem('firstScores');
         const savedEx1 = localStorage.getItem('ex1Scores');
         const savedEx2 = localStorage.getItem('ex2Scores');
-        if (savedFirst) setFirstScores(JSON.parse(savedFirst));
-        if (savedEx1) setEx1Scores(JSON.parse(savedEx1));
-        if (savedEx2) setEx2Scores(JSON.parse(savedEx2));
+        try {
+          if (savedFirst) setFirstScores(JSON.parse(savedFirst));
+          if (savedEx1) setEx1Scores(JSON.parse(savedEx1));
+          if (savedEx2) setEx2Scores(JSON.parse(savedEx2));
+        } catch (e) {
+          console.error("Local storage parse error:", e);
+        }
         setIsLoading(false);
       }
     });
