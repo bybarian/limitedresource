@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { 
   Activity, 
@@ -582,6 +582,17 @@ const EvaluationDashboard = () => {
   const [showSaveToast, setShowSaveToast] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const handleLogin = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (error: any) {
+      if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+        return;
+      }
+      console.error("Login failed:", error);
+    }
+  };
+
   // Auth Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -1151,7 +1162,7 @@ const EvaluationDashboard = () => {
             <div className="flex justify-center mb-6">
               {!user ? (
                 <button 
-                  onClick={signInWithGoogle}
+                  onClick={handleLogin}
                   className="flex items-center gap-3 px-6 py-2.5 bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all active:scale-95 group"
                 >
                   <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="Google" />
