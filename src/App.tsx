@@ -62,6 +62,7 @@ import {
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { auth, db, signInWithGoogle, logout, handleFirestoreError, OperationType } from './firebase';
+import { getImprovementSuggestions, AISuggestion } from './services/aiService';
 
 import { 
   RESEARCH_GAPS, 
@@ -579,6 +580,9 @@ const EvaluationDashboard = () => {
   const [ex1Scores, setEx1Scores] = useState<Record<string, number>>({});
   const [ex2Scores, setEx2Scores] = useState<Record<string, number>>({});
   
+  const [aiSuggestions, setAiSuggestions] = useState<{ suggestions: AISuggestion[], overallSummary: string } | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  
   const [showSaveToast, setShowSaveToast] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -1001,6 +1005,18 @@ const EvaluationDashboard = () => {
     setTimeout(() => setShowSaveToast(false), 2000);
   };
 
+  const handleGenerateAI = async () => {
+    setAiLoading(true);
+    try {
+      const result = await getImprovementSuggestions(radarData, MILESTONES);
+      setAiSuggestions(result);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const currentChecklistData = activeWorkshop === 'first' 
     ? firstData.filter(s => {
         if (w1SubTab === 'C') return s.section.includes('Casualty C');
@@ -1147,6 +1163,83 @@ const EvaluationDashboard = () => {
                     * 演練一包含更複雜的檢傷分類 (expectant 區) 與針對性的中傷處置 (燒傷與骨折)。
                   </div>
                 </div>
+              </div>
+
+              {/* AI Insights Card */}
+              <div className="watercolor-card p-8 bg-white border-2 border-slate-100 shadow-xl overflow-hidden relative">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-50 rounded-xl text-medical-blue">
+                      <Zap size={20} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black text-slate-900">AI 成長建議</h3>
+                      <p className="text-[10px] font-bold text-slate-400">Personalized Insights</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={handleGenerateAI}
+                    disabled={aiLoading}
+                    className="p-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 transition-all shadow-lg active:scale-95"
+                    title="生成 AI 分析建議"
+                  >
+                    {aiLoading ? <RefreshCw size={18} className="animate-spin" /> : <Zap size={18} />}
+                  </button>
+                </div>
+
+                {!aiSuggestions && !aiLoading && (
+                  <div className="flex flex-col items-center justify-center py-10 text-center">
+                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 text-slate-300">
+                      <Activity size={32} />
+                    </div>
+                    <p className="text-[11px] font-bold text-slate-400 leading-relaxed px-4">
+                      點擊上方按鈕，根據目前的雷達圖數據<br />生成專屬的強弱項分析與改進方案。
+                    </p>
+                  </div>
+                )}
+
+                {aiLoading && (
+                  <div className="space-y-4 py-4">
+                    <div className="h-4 bg-slate-100 rounded-full w-3/4 animate-pulse" />
+                    <div className="h-24 bg-slate-50 rounded-2xl w-full animate-pulse" />
+                    <div className="h-24 bg-slate-50 rounded-2xl w-full animate-pulse" />
+                    <div className="h-24 bg-slate-50 rounded-2xl w-full animate-pulse" />
+                  </div>
+                )}
+
+                {aiSuggestions && !aiLoading && (
+                  <div className="space-y-6">
+                    <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl">
+                      <p className="text-[11px] font-black text-slate-900 leading-relaxed italic">
+                        " {aiSuggestions.overallSummary} "
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-4 h-[400px] overflow-y-auto pr-2 scrollbar-hide">
+                      {aiSuggestions.suggestions.map((s, idx) => (
+                        <div key={idx} className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-black text-medical-blue bg-blue-50 px-2 py-0.5 rounded-lg">{s.milestoneId}</span>
+                            <span className="text-[10px] font-bold text-slate-400">{s.milestoneTitle}</span>
+                          </div>
+                          <p className="text-[11px] font-black text-slate-800 leading-tight">
+                            {s.observation}
+                          </p>
+                          <div className="pt-2 mt-2 border-t border-slate-50">
+                            <div className="flex items-start gap-2 mb-2">
+                              <Lightbulb size={12} className="text-orange-400 shrink-0 mt-0.5" />
+                              <p className="text-[10px] font-bold text-slate-500 leading-relaxed">{s.suggestion}</p>
+                            </div>
+                            <div className="flex items-start gap-2 p-2 bg-slate-50 rounded-xl">
+                              <Target size={12} className="text-slate-900 shrink-0 mt-0.5" />
+                              <p className="text-[10px] font-black text-slate-700 leading-relaxed">{s.actionableStep}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
