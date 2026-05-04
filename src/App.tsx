@@ -1150,23 +1150,23 @@ const EvaluationDashboard = () => {
             </div>
 
             <div className="space-y-6">
-              <div className="watercolor-card p-8 bg-slate-900 text-white border-none h-full">
+              <div className="watercolor-card p-8 bg-white border-2 border-slate-100 shadow-xl h-full">
                 <Award className="text-medical-yellow mb-6" size={40} />
-                <h3 className="text-xl font-black mb-6">實戰表現統計</h3>
+                <h3 className="text-xl font-black mb-6 text-slate-800">實戰表現統計</h3>
                 <div className="space-y-8">
                   <div>
-                    <div className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">首次工作坊得分</div>
-                    <div className="text-3xl font-black text-white/60">{calculateTotal(firstScores).toFixed(1)} <span className="text-sm font-bold text-white/20">/ {firstMax.toFixed(1)}</span></div>
+                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">首次工作坊得分</div>
+                    <div className="text-3xl font-black text-slate-400">{calculateTotal(firstScores).toFixed(1)} <span className="text-sm font-bold text-slate-200">/ {firstMax.toFixed(1)}</span></div>
                   </div>
                   <div>
-                    <div className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">演練一得分</div>
-                    <div className="text-3xl font-black">{calculateTotal(ex1Scores).toFixed(1)} <span className="text-sm font-bold text-white/40">/ {ex1Max.toFixed(1)}</span></div>
+                    <div className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">演練一得分</div>
+                    <div className="text-3xl font-black text-slate-700">{calculateTotal(ex1Scores).toFixed(1)} <span className="text-sm font-bold text-slate-300">/ {ex1Max.toFixed(1)}</span></div>
                   </div>
                   <div>
                     <div className="text-[10px] font-black text-medical-blue uppercase tracking-widest mb-2">演練二得分</div>
                     <div className="text-4xl font-black text-medical-blue">{calculateTotal(ex2Scores).toFixed(1)} <span className="text-sm font-bold text-medical-blue/40">/ {ex2Max.toFixed(1)}</span></div>
                   </div>
-                  <div className="pt-6 border-t border-white/10 italic text-[11px] text-white/60 leading-relaxed">
+                  <div className="pt-6 border-t border-slate-100 italic text-[11px] text-slate-600 font-bold leading-relaxed">
                     * 演練一包含更複雜的檢傷分類 (expectant 區) 與針對性的中傷處置 (燒傷與骨折)。
                   </div>
                 </div>

@@ -9,53 +9,20 @@ async function startServer() {
 
   app.use(express.json());
 
-  // 初始化 AI (留在伺服器端)
-  const getAI = () => {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) throw new Error("GEMINI_API_KEY is not configured on server");
-    return new GoogleGenAI({ apiKey });
-  };
-
   // AI 建議路由
   app.post("/api/ai/suggestions", async (req, res) => {
     try {
       const { radarData, milestoneMap } = req.body;
-      const ai = getAI();
+      const apiKey = process.env.GEMINI_API_KEY;
+      
+      if (!apiKey) {
+        return res.status(500).json({ error: "伺服器未設定 GEMINI_API_KEY" });
+      }
 
-      const dataStr = radarData.map((d: any) => 
-        `${d.milestone} (${milestoneMap[d.milestone]?.category || ''}): 首次評分 ${d.first.toFixed(1)}%, 演練一 ${d.ex1.toFixed(1)}%, 演練二 ${d.ex2.toFixed(1)}%`
-      ).join('\n');
-
-      const prompt = `
-你是一位專業的緊急醫療教學專家。以下是一位學員在「侷限醫療」戰傷工作坊實戰演練中的表現數據（以 11 個 Milestone 為指標）。
-數據包含首次工作坊 (Baseline)、第二次演練 (Exercise 1) 與第三次演練 (Exercise 2) 的得分百分比。
-
-表現數據：
-${dataStr}
-
-Milestone 定義參考：
-${JSON.stringify(milestoneMap, null, 2)}
-
-請根據這些數據趨勢進行深入分析，並針對表現最差或成長最緩慢的 3 個項目提供具體的改進建議。
-請以 JSON 格式回傳，結構為：
-{
-  "suggestions": [
-    {
-      "milestoneId": "Milestone ID",
-      "milestoneTitle": "Milestone 分類名稱",
-      "observation": "簡短描述在此項目的表現趨勢",
-      "suggestion": "專業的改進面向建議",
-      "actionableStep": "一個非常具體的練習步驟或行動方案"
-    }
-  ],
-  "overallSummary": "一句話總結整體的成長優勢與核心待開發潛力"
-}
-`;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
+      const genAI = new GoogleGenAI(apiKey);
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.0-flash", // 使用穩定型號或傳入型號
+        generationConfig: {
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,
@@ -81,10 +48,30 @@ ${JSON.stringify(milestoneMap, null, 2)}
         }
       });
 
-      res.json(JSON.parse(response.text || '{}'));
+      const dataStr = radarData.map((d: any) => 
+        `${d.milestone} (${milestoneMap[d.milestone]?.category || ''}): 首次評分 ${d.first.toFixed(1)}%, 演練一 ${d.ex1.toFixed(1)}%, 演練二 ${d.ex2.toFixed(1)}%`
+      ).join('\n');
+
+      const prompt = `
+你是一位專業的緊急醫療教學專家。以下是一位學員在「侷限醫療」戰傷工作坊實戰演練中的表現數據（以 11 個 Milestone 為指標）。
+數據包含首次工作坊 (Baseline)、第二次演練 (Exercise 1) 與第三次演練 (Exercise 2) 的得分百分比。
+
+表現數據：
+${dataStr}
+
+Milestone 定義參考：
+${JSON.stringify(milestoneMap, null, 2)}
+
+請根據這些數據趨勢進行深入分析，並針對表現最差或成長最緩慢的 3 個項目提供具體的改進建議。
+請以 JSON 格式回傳。
+`;
+
+      const result = await model.generateContent(prompt);
+      const response = result.response.text();
+      res.json(JSON.parse(response || '{}'));
     } catch (error: any) {
       console.error("AI Error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error.message || "AI 生成過程發生錯誤" });
     }
   });
 
