@@ -26,7 +26,7 @@ export interface AISuggestion {
 export const getImprovementSuggestions = async (radarData: RadarPoint[], milestonesInfo: any[]) => {
   const apiKey = getApiKey();
   if (!apiKey) {
-    throw new Error("找不到 Gemini API Key。請確保環境變數 GEMINI_API_KEY 已正確設定。");
+    throw new Error("找不到 Gemini API Key。如果是部署在 GitHub Pages，請確保已在 GitHub Repo Settings 的 Secrets 中設定 GEMINI_API_KEY，且在 Actions Workflow 檔案中有傳遞此環境變數。");
   }
   
   const ai = new GoogleGenAI({ apiKey });
