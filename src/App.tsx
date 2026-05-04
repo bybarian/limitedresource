@@ -786,8 +786,94 @@ const EvaluationDashboard = () => {
     }
   ];
 
-  // PDF 1: Exercise 1 Content (追蹤工作坊：演練一 - 重傷 1, 2, 3)
+  // PDF 1: Exercise 2 Content (追蹤工作坊：演練二 - 檢傷, 中傷 1, 2, Expectant 4)
   const ex1Data = [
+    {
+      section: "一、術前階段 (共 35 分)",
+      subsections: [
+        {
+          name: "A. 人員組織及任務分配 (5分)",
+          items: [
+            { id: "A1_2", label: "分區規劃", desc: "明確建立檢傷、復甦與 Expectant 區", weight: 2, milestones: ["SBP2", "ICS3"] },
+            { id: "A2_2", label: "動線設計", desc: "中傷安置於觀察區，避免阻塞主要動線", weight: 1, milestones: ["SBP2", "SBP3"] },
+            { id: "A3_2", label: "角色分工", desc: "EDD、EDN、ICU nurse 等角色指派清楚", weight: 2, milestones: ["ICS3", "ICS2"] },
+          ]
+        },
+        {
+          name: "B. 器械組裝及功能測試 (10分)",
+          items: [
+            { id: "B1_2", label: "中傷#1 燒傷器材", desc: "準備濕紗、敷料、保溫與止痛藥物", weight: 2, milestones: ["PC5", "SBP3"] },
+            { id: "B2_2", label: "中傷#2 骨折器材", desc: "準備副木、彈繃、固定材料，評估神經血管功能", weight: 2, milestones: ["SBP3", "PC2", "PC5"] },
+            { id: "B3_2", label: "重傷#4 expectant 區域", desc: "準備覆蓋物、基本監測與人道照護，不開啟大器械", weight: 2, milestones: ["SBP3", "PC4", "PC7"] },
+            { id: "B4_2", label: "設備功能測試", desc: "監視器、抽吸器與通訊設備可正常使用", weight: 2, milestones: ["SBP3", "PC5"] },
+            { id: "B5_2", label: "物資盤點與整備", desc: "確認藥品、敷料、副木與後送紀錄充足", weight: 2, milestones: ["SBP2", "SBP3"] },
+          ]
+        },
+        {
+          name: "C. 術前損傷控制復甦處置 (20分)",
+          items: [
+            { id: "C1_2", label: "重傷#4 快速辨識", desc: "辨識大量腦組織外溢，判定 non-survivable", weight: 3, milestones: ["PC1", "PC2", "PC4"] },
+            { id: "C2_2", label: "重傷#4 決策", desc: "判定為 expectant，不進行插管輸血或處置", weight: 3, milestones: ["SBP3", "PC4", "PC7"] },
+            { id: "C3_2", label: "中傷#1 燒傷評估", desc: "評估氣道燒傷、TBSA、疼痛與低溫風險", weight: 3, milestones: ["PC2", "PC3", "PC4"] },
+            { id: "C4_2", label: "中傷#1 燒傷處置", desc: "建立 IV、止痛、保溫、估算輸液需求", weight: 3, milestones: ["PC5", "PC6"] },
+            { id: "C5_2", label: "中傷#2 骨折評估", desc: "評估變形疼痛、遠端脈搏、感覺與強度", weight: 3, milestones: ["PC2", "PC3", "PC4"] },
+            { id: "C6_2", label: "中傷#2 骨折處置", desc: "給予 IV 止痛，進行復位與副木固定", weight: 3, milestones: ["PC5", "PC6"] },
+            { id: "C7_2", label: "藥物與保溫", desc: "對中傷完成止痛、抗生素與基本監測", weight: 1, milestones: ["PC5", "PC6"] },
+            { id: "C8_2", label: "檢傷與後送排序", desc: "明確重症#4 不優先後送，中傷穩定後待送", weight: 1, milestones: ["PC7", "SBP3"] },
+          ]
+        }
+      ]
+    },
+    {
+      section: "二、術中階段 (共 50 分)",
+      subsections: [
+        {
+          name: "D. 模擬手術／臨床處置 (30分)",
+          items: [
+            { id: "D1_2", label: "重傷#4 非手術判斷", desc: "清楚說明因預後極差在有限資源下不手術", weight: 5, milestones: ["SBP3", "PC4", "PC7"] },
+            { id: "D2_2", label: "重傷#4 安置紀錄", desc: "移離主區，維持尊嚴照護並完整紀錄", weight: 4, milestones: ["PC7", "ICS2", "SBP2"] },
+            { id: "D3_2", label: "中傷#1 燒傷處置", desc: "完成 TBSA、濕紗、保溫與進階輸液設定", weight: 6, milestones: ["PC2", "PC5", "PC6"] },
+            { id: "D4_2", label: "中傷#1 再評估", desc: "追蹤 VS、疼痛與輸液反應，避免延誤後送", weight: 4, milestones: ["PC3", "PC6", "PC7"] },
+            { id: "D5_2", label: "中傷#2 骨折固定", desc: "完成復位、副木固定，避免二次傷害", weight: 5, milestones: ["PC1", "PC2", "PC6"] },
+            { id: "D6_2", label: "中傷#2 神經血管", desc: "固定前後確認遠端脈搏與感覺運動功能", weight: 3, milestones: ["PC2", "PC6"] },
+            { id: "D7_2", label: "非手術決策一致", desc: "正確說明三位病人皆不進手術", weight: 2, milestones: ["PC4", "PC7"] },
+            { id: "D8_2", label: "資源使用合理", desc: "不啟動不必要手術器械，保留資源予後續病患", weight: 1, milestones: ["SBP3", "SBP2"] },
+          ]
+        },
+        {
+          name: "E. 團隊協作與突發應變 (20分)",
+          items: [
+            { id: "E1_2", label: "領導與指揮", desc: "有明確 TL，能宣告 #4 expectant 與回報優先級", weight: 4, milestones: ["ICS3", "PC4"] },
+            { id: "E2_2", label: "優先順序管理", desc: "依可救治性、病況與效益安排，不讓 #4 消耗主要資源", weight: 4, milestones: ["SBP3", "PC4", "PC7"] },
+            { id: "E3_2", label: "溝通品質", desc: "指令清楚、交接即時，落實 closed-loop communication", weight: 4, milestones: ["ICS2"] },
+            { id: "E4_2", label: "情境覺察", desc: "掌握燒傷狀態、血循與 expectant 安置時間", weight: 4, milestones: ["PC6", "ICS3"] },
+            { id: "E5_2", label: "主動支援補位", desc: "團隊成員主動協助包紮、固定、止痛、紀錄或區域維持", weight: 2, milestones: ["ICS3", "ICS2"] },
+            { id: "E6_2", label: "突發狀況應變", desc: "若病況惡化（如呼吸惡化或血循變差），能即時調整優先級", weight: 2, milestones: ["SBP3", "PC6", "PC7"] },
+          ]
+        }
+      ]
+    },
+    {
+      section: "三、術後階段 (共 15 分)",
+      subsections: [
+        {
+          name: "F. 外部聯繫與資訊回報 (15分)",
+          items: [
+            { id: "F1_2", label: "MIST 交班完整性", desc: "#1/#2/#4 皆能提供 Mechanism, Injury, Signs, Treatment", weight: 3, milestones: ["ICS2", "PC7"] },
+            { id: "F2_2", label: "重傷#4 回報重點", desc: "說明判定理由、目前安置位置與後續需求", weight: 2, milestones: ["ICS2", "PC4", "PC7"] },
+            { id: "F3_2", label: "中傷#1 後送重點", desc: "說明燒傷範圍、輸液速率、濕紗保溫與止痛抗生素", weight: 2, milestones: ["ICS2", "PC6", "PC7"] },
+            { id: "F4_2", label: "中傷#2 後送重點", desc: "說明骨折狀況、止痛固定與遠端脈搏神經現況", weight: 2, milestones: ["ICS2", "PC6", "PC7"] },
+            { id: "F5_2", label: "後送優先順序", desc: "依病情穩定度確定後送救援順位", weight: 2, milestones: ["PC7", "SBP3"] },
+            { id: "F6_2", label: "外部通報", desc: "依 REMOC 指揮鍵回報點、狀況與行動", weight: 2, milestones: ["SBP2", "ICS2"] },
+            { id: "F7_2", label: "持續照護計畫", desc: "提出轉送前監測、藥物與 PFC 照護計畫", weight: 2, milestones: ["PC5", "PC6", "PC7"] },
+          ]
+        }
+      ]
+    }
+  ];
+
+  // PDF 2: Exercise 1 Content (追蹤工作坊：演練一 - 重傷 1, 2, 3)
+  const ex2Data = [
     {
       section: "一、術前階段 (共 35 分)",
       subsections: [
@@ -870,92 +956,6 @@ const EvaluationDashboard = () => {
             { id: "F5_1", label: "後送優先順序", desc: "依病況、手術穩定度與 ICU/救護車決定順位", weight: 2, milestones: ["PC7", "SBP3"] },
             { id: "F6_1", label: "外部通報", desc: "依 REMOC 或院內指揮鏈回報點、狀況與需求", weight: 2, milestones: ["SBP2", "ICS2"] },
             { id: "F7_1", label: "持續照護計畫", desc: "提出轉送前監測、止痛與 PFC 照護計畫", weight: 2, milestones: ["PC5", "PC6", "PC7"] },
-          ]
-        }
-      ]
-    }
-  ];
-
-  // PDF 2: Exercise 2 Content (追蹤工作坊：演練二 - 檢傷, 中傷 1, 2, Expectant 4)
-  const ex2Data = [
-    {
-      section: "一、術前階段 (共 35 分)",
-      subsections: [
-        {
-          name: "A. 人員組織及任務分配 (5分)",
-          items: [
-            { id: "A1_2", label: "分區規劃", desc: "明確建立檢傷、復甦與 Expectant 區", weight: 2, milestones: ["SBP2", "ICS3"] },
-            { id: "A2_2", label: "動線設計", desc: "中傷安置於觀察區，避免阻塞主要動線", weight: 1, milestones: ["SBP2", "SBP3"] },
-            { id: "A3_2", label: "角色分工", desc: "EDD、EDN、ICU nurse 等角色指派清楚", weight: 2, milestones: ["ICS3", "ICS2"] },
-          ]
-        },
-        {
-          name: "B. 器械組裝及功能測試 (10分)",
-          items: [
-            { id: "B1_2", label: "中傷#1 燒傷器材", desc: "準備濕紗、敷料、保溫與止痛藥物", weight: 2, milestones: ["PC5", "SBP3"] },
-            { id: "B2_2", label: "中傷#2 骨折器材", desc: "準備副木、彈繃、固定材料，評估神經血管功能", weight: 2, milestones: ["SBP3", "PC2", "PC5"] },
-            { id: "B3_2", label: "重傷#4 expectant 區域", desc: "準備覆蓋物、基本監測與人道照護，不開啟大器械", weight: 2, milestones: ["SBP3", "PC4", "PC7"] },
-            { id: "B4_2", label: "設備功能測試", desc: "監視器、抽吸器與通訊設備可正常使用", weight: 2, milestones: ["SBP3", "PC5"] },
-            { id: "B5_2", label: "物資盤點與整備", desc: "確認藥品、敷料、副木與後送紀錄充足", weight: 2, milestones: ["SBP2", "SBP3"] },
-          ]
-        },
-        {
-          name: "C. 術前損傷控制復甦處置 (20分)",
-          items: [
-            { id: "C1_2", label: "重傷#4 快速辨識", desc: "辨識大量腦組織外溢，判定 non-survivable", weight: 3, milestones: ["PC1", "PC2", "PC4"] },
-            { id: "C2_2", label: "重傷#4 決策", desc: "判定為 expectant，不進行插管輸血或處置", weight: 3, milestones: ["SBP3", "PC4", "PC7"] },
-            { id: "C3_2", label: "中傷#1 燒傷評估", desc: "評估氣道燒傷、TBSA、疼痛與低溫風險", weight: 3, milestones: ["PC2", "PC3", "PC4"] },
-            { id: "C4_2", label: "中傷#1 燒傷處置", desc: "建立 IV、止痛、保溫、估算輸液需求", weight: 3, milestones: ["PC5", "PC6"] },
-            { id: "C5_2", label: "中傷#2 骨折評估", desc: "評估變形疼痛、遠端脈搏、感覺與強度", weight: 3, milestones: ["PC2", "PC3", "PC4"] },
-            { id: "C6_2", label: "中傷#2 骨折處置", desc: "給予 IV 止痛，進行復位與副木固定", weight: 3, milestones: ["PC5", "PC6"] },
-            { id: "C7_2", label: "藥物與保溫", desc: "對中傷完成止痛、抗生素與基本監測", weight: 1, milestones: ["PC5", "PC6"] },
-            { id: "C8_2", label: "檢傷與後送排序", desc: "明確重症#4 不優先後送，中傷穩定後待送", weight: 1, milestones: ["PC7", "SBP3"] },
-          ]
-        }
-      ]
-    },
-    {
-      section: "二、術中階段 (共 50 分)",
-      subsections: [
-        {
-          name: "D. 模擬手術／臨床處置 (30分)",
-          items: [
-            { id: "D1_2", label: "重傷#4 非手術判斷", desc: "清楚說明因預後極差在有限資源下不手術", weight: 5, milestones: ["SBP3", "PC4", "PC7"] },
-            { id: "D2_2", label: "重傷#4 安置紀錄", desc: "移離主區，維持尊嚴照護並完整紀錄", weight: 4, milestones: ["PC7", "ICS2", "SBP2"] },
-            { id: "D3_2", label: "中傷#1 燒傷處置", desc: "完成 TBSA、濕紗、保溫與進階輸液設定", weight: 6, milestones: ["PC2", "PC5", "PC6"] },
-            { id: "D4_2", label: "中傷#1 再評估", desc: "追蹤 VS、疼痛與輸液反應，避免延誤後送", weight: 4, milestones: ["PC3", "PC6", "PC7"] },
-            { id: "D5_2", label: "中傷#2 骨折固定", desc: "完成復位、副木固定，避免二次傷害", weight: 5, milestones: ["PC1", "PC2", "PC6"] },
-            { id: "D6_2", label: "中傷#2 神經血管", desc: "固定前後確認遠端脈搏與感覺運動功能", weight: 3, milestones: ["PC2", "PC6"] },
-            { id: "D7_2", label: "非手術決策一致", desc: "正確說明三位病人皆不進手術", weight: 2, milestones: ["PC4", "PC7"] },
-            { id: "D8_2", label: "資源使用合理", desc: "不啟動不必要手術器械，保留資源予後續病患", weight: 1, milestones: ["SBP3", "SBP2"] },
-          ]
-        },
-        {
-          name: "E. 團隊協作與突發應變 (20分)",
-          items: [
-            { id: "E1_2", label: "領導與指揮", desc: "有明確 TL，能宣告 #4 expectant 與回報優先級", weight: 4, milestones: ["ICS3", "PC4"] },
-            { id: "E2_2", label: "優先順序管理", desc: "依可救治性、病況與效益安排，不讓 #4 消耗主要資源", weight: 4, milestones: ["SBP3", "PC4", "PC7"] },
-            { id: "E3_2", label: "溝通品質", desc: "指令清楚、交接即時，落實 closed-loop communication", weight: 4, milestones: ["ICS2"] },
-            { id: "E4_2", label: "情境覺察", desc: "掌握燒傷狀態、血循與 expectant 安置時間", weight: 4, milestones: ["PC6", "ICS3"] },
-            { id: "E5_2", label: "主動支援補位", desc: "團隊成員主動協助包紮、固定、止痛、紀錄或區域維持", weight: 2, milestones: ["ICS3", "ICS2"] },
-            { id: "E6_2", label: "突發狀況應變", desc: "若病況惡化（如呼吸惡化或血循變差），能即時調整優先級", weight: 2, milestones: ["SBP3", "PC6", "PC7"] },
-          ]
-        }
-      ]
-    },
-    {
-      section: "三、術後階段 (共 15 分)",
-      subsections: [
-        {
-          name: "F. 外部聯繫與資訊回報 (15分)",
-          items: [
-            { id: "F1_2", label: "MIST 交班完整性", desc: "#1/#2/#4 皆能提供 Mechanism, Injury, Signs, Treatment", weight: 3, milestones: ["ICS2", "PC7"] },
-            { id: "F2_2", label: "重傷#4 回報重點", desc: "說明判定理由、目前安置位置與後續需求", weight: 2, milestones: ["ICS2", "PC4", "PC7"] },
-            { id: "F3_2", label: "中傷#1 後送重點", desc: "說明燒傷範圍、輸液速率、濕紗保溫與止痛抗生素", weight: 2, milestones: ["ICS2", "PC6", "PC7"] },
-            { id: "F4_2", label: "中傷#2 後送重點", desc: "說明骨折狀況、止痛固定與遠端脈搏神經現況", weight: 2, milestones: ["ICS2", "PC6", "PC7"] },
-            { id: "F5_2", label: "後送優先順序", desc: "依病情穩定度確定後送救援順位", weight: 2, milestones: ["PC7", "SBP3"] },
-            { id: "F6_2", label: "外部通報", desc: "依 REMOC 指揮鍵回報點、狀況與行動", weight: 2, milestones: ["SBP2", "ICS2"] },
-            { id: "F7_2", label: "持續照護計畫", desc: "提出轉送前監測、藥物與 PFC 照護計畫", weight: 2, milestones: ["PC5", "PC6", "PC7"] },
           ]
         }
       ]
@@ -1144,7 +1144,7 @@ const EvaluationDashboard = () => {
                     <div className="text-4xl font-black text-medical-blue">{calculateTotal(ex2Scores).toFixed(1)} <span className="text-sm font-bold text-medical-blue/40">/ {ex2Max.toFixed(1)}</span></div>
                   </div>
                   <div className="pt-6 border-t border-white/10 italic text-[11px] text-white/60 leading-relaxed">
-                    * 演練二包含更複雜的檢傷分類 (expectant 區) 與針對性的中傷處置 (燒傷與骨折)。
+                    * 演練一包含更複雜的檢傷分類 (expectant 區) 與針對性的中傷處置 (燒傷與骨折)。
                   </div>
                 </div>
               </div>
