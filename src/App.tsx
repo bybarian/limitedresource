@@ -1517,11 +1517,11 @@ export default function App() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-16"
           >
-            <span className="text-medical-blue font-black text-xs uppercase tracking-[0.3em] mb-4 block">
-              Cathay General Hospital · 醫學研究管理系統
+            <span className="text-medical-blue font-bold text-xs uppercase tracking-[0.3em] mb-4 block">
+              侷限醫療管理系統
             </span>
             <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6">
-              選擇研究計畫向度
+              選擇侷限醫療面向
             </h1>
             <p className="text-black font-black leading-relaxed max-w-2xl mx-auto">
               針對不同臨床場域之「高危險、低頻率」任務，請選擇欲查閱的模組以進入研究報告。
