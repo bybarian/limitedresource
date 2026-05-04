@@ -582,6 +582,7 @@ const EvaluationDashboard = () => {
   
   const [aiSuggestions, setAiSuggestions] = useState<{ suggestions: AISuggestion[], overallSummary: string } | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
   
   const [showSaveToast, setShowSaveToast] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -1011,11 +1012,13 @@ const EvaluationDashboard = () => {
 
   const handleGenerateAI = async () => {
     setAiLoading(true);
+    setAiError(null);
     try {
       const result = await getImprovementSuggestions(radarData, MILESTONES);
       setAiSuggestions(result);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      setAiError(e.message || "生成建議時發生錯誤，請稍後再試。");
     } finally {
       setAiLoading(false);
     }
@@ -1190,6 +1193,14 @@ const EvaluationDashboard = () => {
                     {aiLoading ? <RefreshCw size={18} className="animate-spin" /> : <Zap size={18} />}
                   </button>
                 </div>
+
+                {aiError && (
+                  <div className="p-4 mb-4 bg-red-50 border border-red-100 rounded-2xl">
+                    <p className="text-[11px] font-bold text-red-600 leading-relaxed">
+                      {aiError}
+                    </p>
+                  </div>
+                )}
 
                 {!aiSuggestions && !aiLoading && (
                   <div className="flex flex-col items-center justify-center py-10 text-center">
