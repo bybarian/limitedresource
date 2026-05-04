@@ -9,19 +9,33 @@ async function startServer() {
 
   app.use(express.json());
 
+  // 全域請求紀錄 (Debug 用)
+  app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+  });
+
+  // 健康檢查與紀錄
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", time: new Date().toISOString() });
+  });
+
   // AI 建議路由
   app.post("/api/ai/suggestions", async (req, res) => {
+    console.log("Received AI suggestion request");
     try {
       const { radarData, milestoneMap } = req.body;
       const apiKey = process.env.GEMINI_API_KEY;
       
       if (!apiKey) {
+        console.error("Missing GEMINI_API_KEY");
         return res.status(500).json({ error: "伺服器未設定 GEMINI_API_KEY" });
       }
 
+      console.log("Initializing Gemini model...");
       const genAI = new GoogleGenAI(apiKey);
       const model = genAI.getGenerativeModel({
-        model: "gemini-2.0-flash", // 使用穩定型號或傳入型號
+        model: "gemini-1.5-flash",
         generationConfig: {
           responseMimeType: "application/json",
           responseSchema: {
@@ -49,28 +63,25 @@ async function startServer() {
       });
 
       const dataStr = radarData.map((d: any) => 
-        `${d.milestone} (${milestoneMap[d.milestone]?.category || ''}): 首次評分 ${d.first.toFixed(1)}%, 演練一 ${d.ex1.toFixed(1)}%, 演練二 ${d.ex2.toFixed(1)}%`
+        `${d.milestone}: 首次 ${d.first.toFixed(1)}%, 演練一 ${d.ex1.toFixed(1)}%, 演練二 ${d.ex2.toFixed(1)}%`
       ).join('\n');
 
-      const prompt = `
-你是一位專業的緊急醫療教學專家。以下是一位學員在「侷限醫療」戰傷工作坊實戰演練中的表現數據（以 11 個 Milestone 為指標）。
-數據包含首次工作坊 (Baseline)、第二次演練 (Exercise 1) 與第三次演練 (Exercise 2) 的得分百分比。
-
+      const prompt = `分析學員在「侷限醫療」戰傷工作坊的表現數值。
 表現數據：
 ${dataStr}
 
-Milestone 定義參考：
-${JSON.stringify(milestoneMap, null, 2)}
+Milestone 定義：
+${JSON.stringify(milestoneMap)}
 
-請根據這些數據趨勢進行深入分析，並針對表現最差或成長最緩慢的 3 個項目提供具體的改進建議。
-請以 JSON 格式回傳。
-`;
+請提供 3 個進步最慢項目的具體建議，並以 JSON 格式回傳。`;
 
+      console.log("Generating AI content...");
       const result = await model.generateContent(prompt);
-      const response = result.response.text();
-      res.json(JSON.parse(response || '{}'));
+      const responseText = result.response.text();
+      console.log("AI Response received");
+      res.json(JSON.parse(responseText || '{}'));
     } catch (error: any) {
-      console.error("AI Error:", error);
+      console.error("AI Route Error:", error);
       res.status(500).json({ error: error.message || "AI 生成過程發生錯誤" });
     }
   });
