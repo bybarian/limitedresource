@@ -1,0 +1,23 @@
+{
+  "entities": {
+    "Evaluation": {
+      "title": "Evaluation",
+      "description": "Stores evaluation scores for a user across different workshop sessions.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the user who owns this evaluation." },
+        "firstScores": { "type": "object", "description": "Scores for the first workshop." },
+        "ex1Scores": { "type": "object", "description": "Scores for exercise 1." },
+        "ex2Scores": { "type": "object", "description": "Scores for exercise 2." },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/evaluations/{userId}": {
+      "schema": "Evaluation",
+      "description": "Evaluation document for a specific user."
+    }
+  }
+}

@@ -59,6 +59,9 @@ import {
   Legend, 
   Tooltip 
 } from 'recharts';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { auth, db, signInWithGoogle, logout, handleFirestoreError, OperationType } from './firebase';
 
 import { 
   RESEARCH_GAPS, 
@@ -571,9 +574,51 @@ const EvaluationDashboard = () => {
   const [w1SubTab, setW1SubTab] = useState<'C' | 'D'>('C');
   const [w2SubTab, setW2SubTab] = useState<'ex1' | 'ex2'>('ex1');
   
+  const [user, setUser] = useState<User | null>(null);
   const [firstScores, setFirstScores] = useState<Record<string, number>>({});
   const [ex1Scores, setEx1Scores] = useState<Record<string, number>>({});
   const [ex2Scores, setEx2Scores] = useState<Record<string, number>>({});
+  
+  const [showSaveToast, setShowSaveToast] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Auth Listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      if (!u) {
+        // Load from LocalStorage if not logged in
+        const savedFirst = localStorage.getItem('firstScores');
+        const savedEx1 = localStorage.getItem('ex1Scores');
+        const savedEx2 = localStorage.getItem('ex2Scores');
+        if (savedFirst) setFirstScores(JSON.parse(savedFirst));
+        if (savedEx1) setEx1Scores(JSON.parse(savedEx1));
+        if (savedEx2) setEx2Scores(JSON.parse(savedEx2));
+        setIsLoading(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Firestore Data Listener
+  useEffect(() => {
+    if (!user) return;
+
+    const docRef = doc(db, 'evaluations', user.uid);
+    const unsubscribe = onSnapshot(docRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        if (data.firstScores) setFirstScores(data.firstScores);
+        if (data.ex1Scores) setEx1Scores(data.ex1Scores);
+        if (data.ex2Scores) setEx2Scores(data.ex2Scores);
+      }
+      setIsLoading(false);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, `evaluations/${user.uid}`);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
 
   // Shared TRM items for First Workshop
   const getTRMItems = (prefix: string) => [
@@ -907,14 +952,42 @@ const EvaluationDashboard = () => {
   ];
 
 
+  const updateFirestore = async (updates: Partial<{ firstScores: any, ex1Scores: any, ex2Scores: any }>) => {
+    if (!user) return;
+    const docRef = doc(db, 'evaluations', user.uid);
+    try {
+      await setDoc(docRef, {
+        ...updates,
+        userId: user.uid,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, `evaluations/${user.uid}`);
+    }
+  };
+
   const handleScoreChange = (itemId: string, value: number) => {
     if (activeWorkshop === 'first') {
-      setFirstScores(prev => ({ ...prev, [itemId]: value }));
+      const next = { ...firstScores, [itemId]: value };
+      setFirstScores(next);
+      localStorage.setItem('firstScores', JSON.stringify(next));
+      updateFirestore({ firstScores: next });
     } else if (w2SubTab === 'ex1') {
-      setEx1Scores(prev => ({ ...prev, [itemId]: value }));
+      const next = { ...ex1Scores, [itemId]: value };
+      setEx1Scores(next);
+      localStorage.setItem('ex1Scores', JSON.stringify(next));
+      updateFirestore({ ex1Scores: next });
     } else {
-      setEx2Scores(prev => ({ ...prev, [itemId]: value }));
+      const next = { ...ex2Scores, [itemId]: value };
+      setEx2Scores(next);
+      localStorage.setItem('ex2Scores', JSON.stringify(next));
+      updateFirestore({ ex2Scores: next });
     }
+  };
+
+  const handleManualSave = () => {
+    setShowSaveToast(true);
+    setTimeout(() => setShowSaveToast(false), 2000);
   };
 
   const currentChecklistData = activeWorkshop === 'first' 
@@ -1074,6 +1147,34 @@ const EvaluationDashboard = () => {
             exit={{ opacity: 0, x: -20 }}
             className="space-y-8"
           >
+            {/* Auth Toggle */}
+            <div className="flex justify-center mb-6">
+              {!user ? (
+                <button 
+                  onClick={signInWithGoogle}
+                  className="flex items-center gap-3 px-6 py-2.5 bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all active:scale-95 group"
+                >
+                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="Google" />
+                  <span className="text-xs font-black text-slate-600 group-hover:text-slate-900">使用 Google 登入同步雲端</span>
+                </button>
+              ) : (
+                <div className="flex items-center gap-4 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-medical-blue overflow-hidden border border-white shadow-sm">
+                      {user.photoURL ? <img src={user.photoURL} alt="Avatar" /> : <div className="w-full h-full bg-slate-200" />}
+                    </div>
+                    <span className="text-[11px] font-black text-slate-600">{user.displayName || '已登入使用者'}</span>
+                  </div>
+                  <button 
+                    onClick={logout}
+                    className="text-[10px] font-black text-slate-400 hover:text-red-500 transition-colors uppercase tracking-tight"
+                  >
+                    登出
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Session Selector */}
             <div className="space-y-4">
               <div className="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-sm border border-slate-100 w-fit mx-auto">
@@ -1232,10 +1333,27 @@ const EvaluationDashboard = () => {
                     })}
                   </div>
 
-                  <button className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-xs shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
+                  <button 
+                    onClick={handleManualSave}
+                    className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-xs shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
+                  >
                     <Award size={16} className="text-medical-yellow" />
                     儲存本場評核結果
                   </button>
+
+                  <AnimatePresence>
+                    {showSaveToast && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute bottom-24 left-0 right-0 mx-8 p-3 bg-medical-green text-white text-center rounded-xl font-black text-[11px] shadow-lg flex items-center justify-center gap-2"
+                      >
+                        <CheckCircle2 size={16} />
+                        評核資料已自動儲存至本機瀏覽器
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             </div>
@@ -1253,6 +1371,16 @@ export default function App() {
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [overviewStep, setOverviewStep] = useState(0);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const modules = [
     { id: 'disaster', name: '災難應變', english: 'Disaster Support', icon: Wind, color: 'border-blue-600' },
