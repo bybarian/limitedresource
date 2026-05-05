@@ -170,12 +170,12 @@ const ThemeIcon = ({ icon: Icon, label, colorClass }: { icon: any, label: string
   </div>
 );
 
-const MilestoneIcon = ({ name }: { name: string }) => {
+const MilestoneIcon = ({ name, size = 20, className = "text-medical-blue" }: { name: string, size?: number, className?: string }) => {
   const icons: { [key: string]: any } = {
     Activity, Search, FlaskConical, Stethoscope, Pill, MessageSquare, BarChart, Book, Dumbbell, RefreshCw, Glasses, Shuffle, Navigation, Users, Shield, Zap, Layers, ClipboardList, Cpu
   };
   const Icon = icons[name] || Activity;
-  return <Icon size={20} className="text-medical-blue" />;
+  return <Icon size={size} className={className} />;
 };
 
 const GenericIcon = ({ name, size = 20, className = "" }: { name: string, size?: number, className?: string }) => {
@@ -333,241 +333,106 @@ const GapCard = ({ gap }: { gap: typeof RESEARCH_GAPS[0] }) => (
   </div>
 );
 
-// --- Draggable Milestone Helper Component ---
 
-interface MilestoneNodeProps {
-  item: string;
-  color: string;
-  initialX: number;
-  initialY: number;
-  constraintsRef: React.RefObject<HTMLDivElement | null>;
-}
+// --- 評核專區組件 ---
 
-const DraggableMilestone = ({ item, color, initialX, initialY, constraintsRef }: MilestoneNodeProps) => {
-  // Use motion values to track position and sync with the line
-  const x = useMotionValue(initialX);
-  const y = useMotionValue(initialY);
+// --- Gauge Component for Dashboard ---
+const Gauge = ({ value, max, label, isFirst = false }: { value: number; max: number; label: string, isFirst?: boolean }) => {
+  const percentage = Math.min(100, Math.max(0, (value / max) * 100));
+  
+  // Color logic
+  let colorClass = "text-medical-red";
+  let bgColorClass = "bg-medical-red/10";
+  if (percentage >= 85) {
+    colorClass = "text-medical-green";
+    bgColorClass = "bg-medical-green/10";
+  } else if (percentage >= 60) {
+    colorClass = "text-medical-yellow";
+    bgColorClass = "bg-medical-yellow/10";
+  }
 
-  return (
-    <>
-      {/* Connecting Line - always draws from category center (0,0) to current node position (x, y) */}
-      <svg className="absolute pointer-events-none overflow-visible" style={{ left: '0', top: '0', zIndex: 0 }}>
-        <motion.line
-          x1={0}
-          y1={0}
-          x2={x}
-          y2={y}
-          stroke={color}
-          strokeWidth="3"
-          strokeDasharray="6 3"
-          className="opacity-40"
-        />
-      </svg>
-      
-      <motion.div
-        drag
-        dragConstraints={constraintsRef}
-        dragElastic={0.05}
-        style={{ x, y, left: '0', top: '0' }}
-        className="absolute z-20 cursor-grab active:cursor-grabbing"
-      >
-        <div className="transform -translate-x-1/2 -translate-y-1/2">
-          <div 
-            className="px-5 py-2.5 bg-white rounded-full text-[11px] font-black shadow-[0_6px_20px_rgba(0,0,0,0.18)] border-[4px] hover:scale-105 transition-all whitespace-nowrap"
-            style={{ 
-              borderColor: color,
-              color: '#1e293b',
-              boxShadow: `0 8px 24px -6px ${color}44`
-            }}
-          >
-            {item}
-          </div>
-        </div>
-      </motion.div>
-    </>
-  );
-};
-
-const MilestoneMindMap = () => {
-  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
-  const constraintsRef = useRef<HTMLDivElement>(null);
-
-  const categories = [
-    { 
-      id: 'k', 
-      name: 'Knowledge (K)', 
-      color: '#ffc000', 
-      items: [
-        'PC1 穩定: MARCH-PAWS',
-        'PC2 評估: Primary survey',
-        'PC3 診斷: E-FAST',
-        'PC4 診斷: TECC/TCCC',
-        'PC5 藥物: MARCH-PAWS',
-        'PC6 再評估: MARCH reassessment',
-        'PC7 處置: 後送概論',
-        'ICS2 團隊: MIST / 9-line',
-        'ICS3 領導: 指挥鏈',
-        'SBP2 導航: 韌性醫療系統',
-        'SBP3 資源: 資源配置'
-      ], 
-      icon: Book 
-    },
-    { 
-      id: 'b1', 
-      name: 'Procedural (B)', 
-      color: '#ed7d31', 
-      items: [
-        'PC1 穩定: 止血帶/交界處/胸封',
-        'PC2 評估: (問接) 評估技巧',
-        'PC3 診斷: E-FAST 操作',
-        'PC5 藥物: IV/IO 建立、輸血',
-        'PC7 處置: 桌推演練 (部分)',
-        'ICS2 溝通: 團隊演練',
-        'ICS3 領導: 分組任務',
-        'PC4 診斷: 氣道處置與傷情判斷'
-      ], 
-      icon: Wrench 
-    },
-    { 
-      id: 'b2', 
-      name: 'Cognitive (VR)', 
-      color: '#ed4848', 
-      items: [
-        'PC1 穩定: 單一傷患 MARCH 決策',
-        'PC2 評估: 單一傷患評估 decision',
-        'PC3 診斷: 診斷 decision',
-        'PC4 診斷: 單一 + 多傷患 decision',
-        'PC5 藥物: resuscitation decision',
-        'PC6 再評估: 動態病況變化',
-        'PC7 處置: 後送決策 (priority)',
-        'ICS2 溝通: 溝通 decision (通報)',
-        'ICS3 領導: 指揮決策 (任務分配)',
-        'SBP2 導航: 事前準備 (流程建置)',
-        'SBP3 資源: 檢傷 + 後送 (資源分配)'
-      ], 
-      icon: Gamepad2 
-    },
-    { 
-      id: 'sim', 
-      name: 'Integration (Sim)', 
-      color: '#70ad47', 
-      items: [
-        'PC1 穩定: 熱區止血、暖區持續止血',
-        'PC2 評估: 暖區完整評估 (ABCDE)',
-        'PC3 診斷: 暖區 E-FAST 判讀',
-        'PC4 診斷: 複合傷情判斷',
-        'PC5 藥物: 暖區輸血、藥物給予',
-        'PC6 再評估: 持續 reassessment',
-        'PC7 處置: MEDEVAC 決策與搬離',
-        'ICS2 溝通: closed-loop communication',
-        'ICS3 領導: 熱區/暖區團隊整合',
-        'SBP2 導航: 集結點建立與流程運作',
-        'SBP3 資源: 資源受限情境決策'
-      ], 
-      icon: Activity 
-    },
-  ];
+  // Semicircle gauge path calculation
+  // Radius 40, Center (50, 50)
+  // M 10 50 A 40 40 0 0 1 90 50
+  const circumference = Math.PI * 40;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className="watercolor-card p-10 bg-white border-none shadow-sm overflow-hidden min-h-[1100px] relative" ref={constraintsRef}>
-      <h3 className="text-2xl font-black text-slate-900 mb-4 text-center">里程碑與教學資源規劃心智圖</h3>
-      <div className="text-center text-[11px] font-black text-slate-400 mb-12 uppercase tracking-[0.2em] leading-relaxed max-w-2xl mx-auto">
-        此架構圖展示各里程碑於四大教學向度之分布。您可以自由拖動各里程碑節點，查看與分類中心的連結關係。
-      </div>
-      
-      <div className="relative h-[850px] w-full flex items-center justify-center">
-        {/* Central Hub - Fixed */}
-        <motion.div 
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="z-50 w-40 h-40 rounded-[48px] border-[6px] border-slate-900 bg-white text-slate-900 flex flex-col items-center justify-center text-center p-4 shadow-[0_20px_50px_rgba(0,0,0,0.2)] relative"
-        >
-          <div className="absolute inset-0 bg-slate-50/50 rounded-[42px]" />
-          <Target size={36} className="mb-2 relative z-10 text-slate-900" />
-          <span className="text-sm font-black leading-tight relative z-10 uppercase tracking-tight">臨床勝任能力<br />核心指標</span>
-          
-          <motion.div 
-             animate={{ scale: [1, 1.15, 1], opacity: [0.1, 0.2, 0.1] }}
-             transition={{ duration: 4, repeat: Infinity }}
-             className="absolute inset-0 rounded-[48px] border-4 border-slate-900 -z-10"
+    <div className="flex flex-col items-center group">
+      <div className="relative w-40 h-24">
+        <svg viewBox="0 0 100 60" className="w-full h-full">
+          {/* Background track */}
+          <path
+            d="M 10 50 A 40 40 0 0 1 90 50"
+            fill="none"
+            stroke="#f1f5f9"
+            strokeWidth="12"
+            strokeLinecap="round"
           />
-        </motion.div>
-
-        {/* Categories and Draggable Milestone Branches */}
-        {categories.map((cat, idx) => {
-          const initialAngle = (idx * 90) - 90; // Top, Right, Bottom, Left
-          const initialRadius = 320; 
-          const initialX = Math.cos(initialAngle * Math.PI / 180) * initialRadius;
-          const initialY = Math.sin(initialAngle * Math.PI / 180) * initialRadius;
-
-          return (
-            <div 
-              key={cat.id}
-              className="absolute"
-              style={{ left: '50%', top: '50%', transform: `translate(${initialX}px, ${initialY}px)` }}
-            >
-              <div className="flex flex-col items-center relative">
-                {/* Category Node - Fixed */}
-                <div 
-                  className="w-28 h-28 rounded-[36px] bg-white border-[6px] flex items-center justify-center shadow-2xl relative z-40 transition-transform hover:scale-105"
-                  style={{ borderColor: cat.color }}
-                >
-                  <cat.icon style={{ color: cat.color }} size={44} />
-                  <div 
-                    className="absolute -bottom-10 whitespace-nowrap text-[14px] font-black text-slate-900 bg-white shadow-xl px-5 py-2.5 rounded-full border-[3.5px]"
-                    style={{ borderColor: cat.color }}
-                  >
-                    {cat.name}
-                  </div>
-                </div>
-
-                {/* Sub-items (Milestones) - Optimized Draggable Nodes */}
-                {cat.items.map((item, i) => {
-                  const count = cat.items.length;
-                  const layer = i % 2;
-                  const itemRadius = 180 + (layer * 110); 
-                  
-                  // Reduced spread angle to 70 degrees to keep it focused
-                  const spreadAngle = 70; 
-                  const startAngle = initialAngle - spreadAngle/2;
-                  const itemAngle = count > 1 ? startAngle + (i / (count - 1)) * spreadAngle : initialAngle;
-                  
-                  // Initial starting positions relative to Category Center
-                  const startX = Math.cos(itemAngle * Math.PI / 180) * itemRadius;
-                  const startY = Math.sin(itemAngle * Math.PI / 180) * itemRadius;
-
-                  return (
-                    <DraggableMilestone 
-                      key={item}
-                      item={item}
-                      color={cat.color}
-                      initialX={startX}
-                      initialY={startY}
-                      constraintsRef={constraintsRef}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="mt-20 flex justify-center">
-        <div className="max-w-2xl w-full p-6 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex items-center gap-5">
-          <div className="p-3 bg-white rounded-xl shadow-md shrink-0">
-            <Info size={24} className="text-medical-blue" />
+          {/* Red Zone (0-60%) */}
+          <path
+            d="M 10 50 A 40 40 0 0 1 38 18"
+            fill="none"
+            stroke="#ff9494"
+            strokeWidth="12"
+            className="opacity-10"
+          />
+          {/* Yellow Zone (60-85%) */}
+          <path
+            d="M 38 18 A 40 40 0 0 1 74 18"
+            fill="none"
+            stroke="#ffc000"
+            strokeWidth="12"
+            className="opacity-10"
+          />
+          {/* Green Zone (85-100%) */}
+          <path
+            d="M 74 18 A 40 40 0 0 1 90 50"
+            fill="none"
+            stroke="#70ad47"
+            strokeWidth="12"
+            className="opacity-10"
+          />
+          {/* Progress fill */}
+          <motion.path
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            d="M 10 50 A 40 40 0 0 1 90 50"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="12"
+            strokeLinecap="round"
+            className={`${colorClass} transition-colors duration-500`}
+            style={{ 
+              strokeDasharray: circumference,
+            }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-end pb-2">
+          <div className="flex flex-col items-center">
+            <span className={`text-2xl font-black ${colorClass}`}>
+              {percentage.toFixed(0)}%
+            </span>
+            {isFirst && (
+              <span className="text-[10px] font-black text-slate-400 -mt-1 tracking-tight">100% SCALE</span>
+            )}
           </div>
-          <p className="text-[12px] text-slate-600 font-bold leading-relaxed">
-            此心智圖視覺化了 <span className="text-slate-900 underline decoration-slate-400">里程碑 (Milestones)</span> 與教學向度的連結。您可以手動調整節點位置以利觀察。
-          </p>
         </div>
+      </div>
+      
+      <div className={`mt-4 px-4 py-1.5 rounded-full ${bgColorClass} border border-transparent group-hover:border-current transition-all`}>
+        <span className={`text-[11px] font-black uppercase tracking-widest ${colorClass}`}>
+          {label}
+        </span>
+      </div>
+      
+      <div className="mt-2 text-[10px] font-bold text-slate-400">
+        {value.toFixed(1)} <span className="opacity-50">/ {max.toFixed(1)}</span>
       </div>
     </div>
   );
 };
-
-// --- 評核專區組件 ---
 
 const EvaluationDashboard = () => {
   const [activeSubTab, setActiveSubTab] = useState<'trends' | 'checklist'>('trends');
@@ -1087,178 +952,199 @@ const EvaluationDashboard = () => {
       />
 
       {/* Main Tab Controls */}
-      <div className="flex bg-slate-100 p-1.5 rounded-2xl w-fit mx-auto shadow-inner">
-        <button 
-          onClick={() => setActiveSubTab('trends')}
-          className={`px-8 py-2.5 rounded-xl text-xs font-black transition-all ${activeSubTab === 'trends' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-700'}`}
-        >
-          能力成長雷達圖 (歷次實戰對比)
-        </button>
-        <button 
-          onClick={() => setActiveSubTab('checklist')}
-          className={`px-8 py-2.5 rounded-xl text-xs font-black transition-all ${activeSubTab === 'checklist' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-700'}`}
-        >
-          實戰評核清單
-        </button>
-      </div>
-
-      <AnimatePresence mode="wait">
-        {activeSubTab === 'trends' ? (
-          <motion.div 
-            key="trends"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="grid grid-cols-1 xl:grid-cols-3 gap-8"
-          >
-            <div className="xl:col-span-2 watercolor-card p-10 bg-white shadow-xl min-h-[600px] flex flex-col">
-              <div className="flex items-center justify-between mb-10">
-                <div>
-                   <h3 className="text-xl font-black text-slate-900 mb-1">實戰表現成長對比</h3>
-                   <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Growth Tracking: Workshop 1 → Exercise 1 → 2</p>
-                </div>
-                <div className="flex gap-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-slate-300" />
-                    <span className="text-[10px] font-black text-slate-400">首次 (Baseline)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-[#64748b]" />
-                    <span className="text-[10px] font-black text-slate-500">演練一</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-medical-blue" />
-                    <span className="text-[10px] font-black text-slate-900">演練二</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex-1 w-full flex items-center justify-center">
-                <ResponsiveContainer width="100%" height={450}>
-                  <RadarChart data={radarData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
-                    <PolarGrid stroke="#e2e8f0" strokeDasharray="4 4" />
-                    <PolarAngleAxis dataKey="milestone" tick={{ fill: '#64748b', fontSize: 13, fontWeight: 900 }} />
-                    <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: '#cbd5e1', fontSize: 10 }} />
-                    <Radar name="首次工作坊" dataKey="first" stroke="#94a3b8" fill="#94a3b8" fillOpacity={0.05} strokeWidth={1} strokeDasharray="4 4" />
-                    <Radar name="追蹤：演練一" dataKey="ex1" stroke="#64748b" fill="#64748b" fillOpacity={0.1} strokeWidth={2} />
-                    <Radar name="追蹤：演練二" dataKey="ex2" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} strokeWidth={3} />
-                    <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }} />
-                    <Legend />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
+            <div className="flex bg-slate-100 p-1.5 rounded-2xl w-fit mx-auto shadow-inner">
+              <button 
+                onClick={() => setActiveSubTab('trends')}
+                className={`px-8 py-2.5 rounded-xl text-xs font-black transition-all ${activeSubTab === 'trends' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                能力成長雷達圖
+              </button>
+              <button 
+                onClick={() => setActiveSubTab('checklist')}
+                className={`px-8 py-2.5 rounded-xl text-xs font-black transition-all ${activeSubTab === 'checklist' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                實戰評核清單
+              </button>
             </div>
 
-            <div className="space-y-6">
-              <div className="watercolor-card p-8 bg-white border-2 border-slate-100 shadow-xl h-full">
-                <Award className="text-medical-yellow mb-6" size={40} />
-                <h3 className="text-xl font-black mb-6 text-slate-900">實戰表現統計</h3>
-                <div className="space-y-8">
-                  <div>
-                    <div className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2">首次工作坊得分</div>
-                    <div className="text-3xl font-black text-slate-900">{calculateTotal(firstScores).toFixed(1)} <span className="text-sm font-bold text-slate-400">/ {firstMax.toFixed(1)}</span></div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2">演練一得分</div>
-                    <div className="text-3xl font-black text-black">{calculateTotal(ex1Scores).toFixed(1)} <span className="text-sm font-bold text-slate-500">/ {ex1Max.toFixed(1)}</span></div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-black text-blue-900 uppercase tracking-widest mb-2 font-black">演練二得分</div>
-                    <div className="text-4xl font-black text-blue-950">{calculateTotal(ex2Scores).toFixed(1)} <span className="text-sm font-bold text-blue-900/60">/ {ex2Max.toFixed(1)}</span></div>
-                  </div>
-                  <div className="pt-6 border-t border-slate-200 italic text-xs text-slate-900 font-extrabold leading-relaxed">
-                    * 演練一包含更複雜的檢傷分類 (expectant 區) 與針對性的中傷處置 (燒傷與骨折)。
-                  </div>
-                </div>
-              </div>
-
-              {/* AI Insights Card */}
-              <div className="watercolor-card p-8 bg-white border-2 border-slate-100 shadow-xl overflow-hidden relative">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-50 rounded-xl text-medical-blue">
-                      <Zap size={20} />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-black text-slate-900">AI 成長建議</h3>
-                      <p className="text-[10px] font-bold text-slate-400">Personalized Insights</p>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={handleGenerateAI}
-                    disabled={aiLoading}
-                    className="p-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 transition-all shadow-lg active:scale-95"
-                    title="生成 AI 分析建議"
-                  >
-                    {aiLoading ? <RefreshCw size={18} className="animate-spin" /> : <Zap size={18} />}
-                  </button>
-                </div>
-
-                {aiError && (
-                  <div className="p-4 mb-4 bg-red-50 border border-red-100 rounded-2xl">
-                    <p className="text-[11px] font-bold text-red-600 leading-relaxed">
-                      {aiError}
-                    </p>
-                  </div>
-                )}
-
-                {!aiSuggestions && !aiLoading && (
-                  <div className="flex flex-col items-center justify-center py-10 text-center">
-                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 text-slate-300">
-                      <Activity size={32} />
-                    </div>
-                    <p className="text-[11px] font-bold text-slate-400 leading-relaxed px-4">
-                      點擊上方按鈕，根據目前的雷達圖數據<br />生成專屬的強弱項分析與改進方案。
-                    </p>
-                  </div>
-                )}
-
-                {aiLoading && (
-                  <div className="space-y-4 py-4">
-                    <div className="h-4 bg-slate-100 rounded-full w-3/4 animate-pulse" />
-                    <div className="h-24 bg-slate-50 rounded-2xl w-full animate-pulse" />
-                    <div className="h-24 bg-slate-50 rounded-2xl w-full animate-pulse" />
-                    <div className="h-24 bg-slate-50 rounded-2xl w-full animate-pulse" />
-                  </div>
-                )}
-
-                {aiSuggestions && !aiLoading && (
-                  <div className="space-y-6">
-                    <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl">
-                      <p className="text-[11px] font-black text-slate-900 leading-relaxed italic">
-                        " {aiSuggestions.overallSummary} "
-                      </p>
-                    </div>
-                    
-                    <div className="space-y-4 h-[400px] overflow-y-auto pr-2 scrollbar-hide">
-                      {aiSuggestions.suggestions.map((s, idx) => (
-                        <div key={idx} className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-black text-medical-blue bg-blue-50 px-2 py-0.5 rounded-lg">{s.milestoneId}</span>
-                            <span className="text-[10px] font-bold text-slate-400">{s.milestoneTitle}</span>
+            <AnimatePresence mode="wait">
+              {activeSubTab === 'trends' ? (
+                <motion.div 
+                  key="trends"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-8"
+                >
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                    <div className="watercolor-card p-10 bg-white shadow-xl min-h-[500px] flex flex-col">
+                      <div className="flex items-center justify-between mb-10">
+                        <div>
+                           <h3 className="text-xl font-black text-slate-900 mb-1">實戰表現成長對比</h3>
+                           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Growth Tracking</p>
+                        </div>
+                        <div className="flex gap-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-slate-300" />
+                            <span className="text-[9px] font-black text-slate-400">首次</span>
                           </div>
-                          <p className="text-[11px] font-black text-slate-800 leading-tight">
-                            {s.observation}
-                          </p>
-                          <div className="pt-2 mt-2 border-t border-slate-50">
-                            <div className="flex items-start gap-2 mb-2">
-                              <Lightbulb size={12} className="text-orange-400 shrink-0 mt-0.5" />
-                              <p className="text-[10px] font-bold text-slate-500 leading-relaxed">{s.suggestion}</p>
-                            </div>
-                            <div className="flex items-start gap-2 p-2 bg-slate-50 rounded-xl">
-                              <Target size={12} className="text-slate-900 shrink-0 mt-0.5" />
-                              <p className="text-[10px] font-black text-slate-700 leading-relaxed">{s.actionableStep}</p>
-                            </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-medical-blue" />
+                            <span className="text-[9px] font-black text-slate-900">第二次</span>
                           </div>
                         </div>
-                      ))}
+                      </div>
+
+                      <div className="flex-1 w-full flex items-center justify-center">
+                        <ResponsiveContainer width="100%" height={400}>
+                          <RadarChart data={radarData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
+                            <PolarGrid stroke="#e2e8f0" strokeDasharray="4 4" />
+                            <PolarAngleAxis dataKey="milestone" tick={{ fill: '#64748b', fontSize: 13, fontWeight: 900 }} />
+                            <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: '#cbd5e1', fontSize: 10 }} />
+                            <Radar name="首次工作坊" dataKey="first" stroke="#94a3b8" fill="#94a3b8" fillOpacity={0.05} strokeWidth={1} strokeDasharray="4 4" />
+                            <Radar name="追蹤：演練一" dataKey="ex1" stroke="#64748b" fill="#64748b" fillOpacity={0.1} strokeWidth={2} />
+                            <Radar name="追蹤：演練二" dataKey="ex2" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} strokeWidth={3} />
+                            <Tooltip />
+                          </RadarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+
+                    <div className="watercolor-card p-10 bg-white border-none shadow-2xl h-full relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-full -mr-16 -mt-16 z-0" />
+                      
+                      <div className="relative z-10 h-full flex flex-col">
+                        <div className="flex items-center gap-4 mb-10">
+                          <div className="p-3 bg-medical-yellow/20 rounded-2xl">
+                            <Award className="text-medical-yellow" size={32} />
+                          </div>
+                          <div>
+                            <h3 className="text-2xl font-black text-slate-900">實戰表現儀表板</h3>
+                            <p className="text-xs font-bold text-slate-400">Integrated Performance Dashboard</p>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-8 flex-grow justify-around pb-10">
+                          <Gauge 
+                            value={calculateTotal(firstScores)} 
+                            max={firstMax} 
+                            label="首次工作坊" 
+                            isFirst={true}
+                          />
+                          <Gauge 
+                            value={calculateTotal(ex1Scores)} 
+                            max={ex1Max} 
+                            label="演練一" 
+                          />
+                          <Gauge 
+                            value={calculateTotal(ex2Scores)} 
+                            max={ex2Max} 
+                            label="演練二" 
+                          />
+                        </div>
+
+                        <div className="mt-auto flex items-start gap-4 p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                          <div className="p-2 bg-white rounded-lg shadow-sm shrink-0">
+                            <Info size={16} className="text-slate-400" />
+                          </div>
+                          <p className="italic text-[11px] text-slate-500 font-bold leading-relaxed">
+                            * 演練一包含更複雜的檢傷分類 (expectant 區) 與針對性的中傷處置 (燒傷與骨折)。系統針對不同難度係數進行加權計算，綠色代表已達成臨床勝任門檻。
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        ) : (
+
+                  {/* AI Insights Card - Full Width */}
+                  <div className="watercolor-card p-8 bg-white border-2 border-slate-100 shadow-xl overflow-hidden relative w-full">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-50 rounded-xl text-medical-blue">
+                          <Zap size={20} />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-black text-slate-900">AI 成長建議</h3>
+                          <p className="text-[10px] font-bold text-slate-400">Personalized Insights for Growth</p>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={handleGenerateAI}
+                        disabled={aiLoading}
+                        className="flex items-center gap-2 px-6 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 transition-all shadow-lg active:scale-95"
+                      >
+                        {aiLoading ? <RefreshCw size={18} className="animate-spin" /> : <Zap size={18} />}
+                        <span className="text-xs font-black">重新生成分析</span>
+                      </button>
+                    </div>
+
+                    {aiError && (
+                      <div className="p-4 mb-4 bg-red-50 border border-red-100 rounded-2xl">
+                        <p className="text-[11px] font-bold text-red-600 leading-relaxed">
+                          {aiError}
+                        </p>
+                      </div>
+                    )}
+
+                    {!aiSuggestions && !aiLoading && (
+                      <div className="flex flex-col items-center justify-center py-10 text-center">
+                        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 text-slate-300">
+                          <Activity size={32} />
+                        </div>
+                        <p className="text-[11px] font-bold text-slate-400 leading-relaxed px-4">
+                          點擊上方按鈕，根據目前的雷達圖數據<br />生成專屬的強弱項分析與改進方案。
+                        </p>
+                      </div>
+                    )}
+
+                    {aiLoading && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-4">
+                        <div className="col-span-full h-24 bg-slate-50 rounded-2xl w-full animate-pulse" />
+                        <div className="h-48 bg-slate-50 rounded-2xl w-full animate-pulse" />
+                        <div className="h-48 bg-slate-50 rounded-2xl w-full animate-pulse" />
+                        <div className="h-48 bg-slate-50 rounded-2xl w-full animate-pulse" />
+                      </div>
+                    )}
+
+                    {aiSuggestions && !aiLoading && (
+                      <div className="space-y-8">
+                        <div className="p-8 bg-blue-50 border-2 border-blue-100 rounded-3xl shadow-inner text-center">
+                          <p className="text-lg md:text-xl font-black text-slate-900 leading-relaxed italic">
+                            " {aiSuggestions.overallSummary} "
+                          </p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {aiSuggestions.suggestions.map((s, idx) => (
+                            <div key={idx} className="p-8 rounded-3xl bg-white border border-slate-100 shadow-md space-y-4 hover:shadow-xl transition-all hover:-translate-y-1">
+                              <div className="flex items-center justify-between border-b border-slate-50 pb-3">
+                                <span className="text-xs font-black text-medical-blue bg-blue-50 px-3 py-1 rounded-xl">{s.milestoneId}</span>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{s.milestoneTitle}</span>
+                              </div>
+                              <p className="text-lg font-black text-slate-800 leading-tight">
+                                {s.observation}
+                              </p>
+                              <div className="pt-2 space-y-4">
+                                <div className="flex items-start gap-4">
+                                  <div className="p-2 bg-orange-50 rounded-lg shrink-0">
+                                    <Lightbulb size={18} className="text-orange-400" />
+                                  </div>
+                                  <p className="text-xs font-bold text-slate-500 leading-relaxed">{s.suggestion}</p>
+                                </div>
+                                <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                  <div className="p-2 bg-white rounded-lg shadow-sm shrink-0">
+                                    <Target size={18} className="text-slate-900" />
+                                  </div>
+                                  <p className="text-xs md:text-sm font-black text-slate-700 leading-relaxed">{s.actionableStep}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ) : (
           <motion.div 
             key="checklist"
             initial={{ opacity: 0, x: 20 }}
@@ -1502,10 +1388,10 @@ export default function App() {
   }, []);
 
   const modules = [
-    { id: 'disaster', name: '災難應變', english: 'Disaster Support', icon: Wind, color: 'border-blue-600' },
-    { id: 'tactical', name: '戰傷醫療', english: 'Combat Casualty', icon: ShieldAlert, color: 'border-red-600' },
-    { id: 'community', name: '社區在宅', english: 'Home & Community', icon: Home, color: 'border-green-600' },
-    { id: 'emerging', name: '新興傳染', english: 'Infectious Disease', icon: Biohazard, color: 'border-red-800' },
+    { id: 'disaster', name: '災難應變', english: 'Disaster Support', icon: Wind, color: 'border-blue-600', image: '/disaster_icon.png' },
+    { id: 'tactical', name: '戰傷醫療', english: 'Combat Casualty', icon: ShieldAlert, color: 'border-red-600', image: '/tactical_icon.png' },
+    { id: 'community', name: '社區在宅', english: 'Home & Community', icon: Home, color: 'border-green-600', image: '/community_icon.png' },
+    { id: 'emerging', name: '新興傳染', english: 'Infectious Disease', icon: Biohazard, color: 'border-red-800', image: '/emerging_icon.png' },
   ];
 
   if (!selectedModule) {
@@ -1539,8 +1425,12 @@ export default function App() {
                 onClick={() => setSelectedModule(mod.id)}
                 className={`p-8 bg-white rounded-3xl shadow-xl border-l-8 ${mod.color} flex flex-col items-center text-center gap-4 group transition-all`}
               >
-                <div className="p-4 bg-slate-50 text-slate-900 rounded-2xl group-hover:bg-medical-blue/10 group-hover:text-medical-blue transition-colors">
-                  <mod.icon size={48} />
+                <div className="p-4 bg-slate-50 text-slate-900 rounded-2xl group-hover:bg-medical-blue/10 group-hover:text-medical-blue transition-colors flex items-center justify-center overflow-hidden w-24 h-24">
+                  {mod.image ? (
+                    <img src={mod.image} alt={mod.name} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                  ) : (
+                    <mod.icon size={48} />
+                  )}
                 </div>
                 <div>
                   <div className="text-lg font-black text-slate-900 italic">{mod.name}</div>
@@ -1606,9 +1496,10 @@ export default function App() {
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2 mb-6"
+            className="flex items-center gap-3 mb-6"
           >
             <div className="h-px w-8 bg-medical-blue" />
+            <img src="/cathay_logo.png" alt="Cathay Logo" className="h-8 object-contain" referrerPolicy="no-referrer" />
             <span className="text-medical-blue font-bold text-xs uppercase tracking-widest">
               Cathay General Hospital · 國泰綜合醫院教學部
             </span>
@@ -1619,10 +1510,20 @@ export default function App() {
               <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-5xl md:text-6xl font-black text-slate-900 mb-6 leading-[1.2]"
+                className="text-6xl md:text-8xl font-black text-slate-900 mb-8 leading-tight flex flex-col items-start relative"
               >
-                侷限醫療 <br />
-                <span className="text-medical-green underline decoration-medical-green/30 decoration-8 underline-offset-8">研究計畫</span>
+                <div className="relative z-10 flex items-center pr-12">
+                  <span>侷限醫療</span>
+                  <div className="absolute right-0 top-full -translate-y-2/3 pointer-events-none">
+                    <img 
+                      src="/ecg_line.png" 
+                      alt="ECG" 
+                      className="h-32 md:h-48 object-contain opacity-[0.15]" 
+                      referrerPolicy="no-referrer" 
+                    />
+                  </div>
+                </div>
+                <div className="text-medical-green underline decoration-medical-green/30 decoration-8 underline-offset-8 relative z-10">研究計畫</div>
               </motion.h1>
               <motion.p 
                 initial={{ opacity: 0 }}
@@ -1641,8 +1542,8 @@ export default function App() {
                 whileHover={{ y: -5 }}
                 className="p-6 bg-white rounded-3xl shadow-xl border-l-8 border-l-blue-600 flex flex-col items-center text-center gap-2"
               >
-                <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl mb-2">
-                  <Wind size={32} />
+                <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl mb-2 w-16 h-16 flex items-center justify-center overflow-hidden">
+                  <img src="/disaster_icon.png" alt="災難應變" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                 </div>
                 <span className="text-sm font-black text-slate-900 italic">災難應變</span>
                 <span className="text-[10px] text-slate-400 font-bold uppercase">Disaster</span>
@@ -1652,8 +1553,8 @@ export default function App() {
                 whileHover={{ y: -5 }}
                 className="p-6 bg-white rounded-3xl shadow-xl border-l-8 border-l-red-600 flex flex-col items-center text-center gap-2"
               >
-                <div className="p-3 bg-red-50 text-red-600 rounded-2xl mb-2">
-                  <ShieldAlert size={32} />
+                <div className="p-3 bg-red-50 text-red-600 rounded-2xl mb-2 w-16 h-16 flex items-center justify-center overflow-hidden">
+                  <img src="/tactical_icon.png" alt="戰傷醫療" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                 </div>
                 <span className="text-sm font-black text-slate-900 italic">戰傷醫療</span>
                 <span className="text-[10px] text-slate-400 font-bold uppercase">Tactical</span>
@@ -1663,8 +1564,8 @@ export default function App() {
                 whileHover={{ y: -5 }}
                 className="p-6 bg-white rounded-3xl shadow-xl border-l-8 border-l-green-600 flex flex-col items-center text-center gap-2"
               >
-                <div className="p-3 bg-green-50 text-green-600 rounded-2xl mb-2">
-                  <Home size={32} />
+                <div className="p-3 bg-green-50 text-green-600 rounded-2xl mb-2 w-16 h-16 flex items-center justify-center overflow-hidden">
+                  <img src="/community_icon.png" alt="社區在宅" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                 </div>
                 <span className="text-sm font-black text-slate-900 italic">社區在宅</span>
                 <span className="text-[10px] text-slate-400 font-bold uppercase">Community</span>
@@ -1674,8 +1575,8 @@ export default function App() {
                 whileHover={{ y: -5 }}
                 className="p-6 bg-white rounded-3xl shadow-xl border-l-8 border-l-red-800 flex flex-col items-center text-center gap-2"
               >
-                <div className="p-3 bg-red-50 text-red-800 rounded-2xl mb-2">
-                  <Biohazard size={32} />
+                <div className="p-3 bg-red-50 text-red-800 rounded-2xl mb-2 w-16 h-16 flex items-center justify-center overflow-hidden">
+                  <img src="/emerging_icon.png" alt="新興傳染" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                 </div>
                 <span className="text-sm font-black text-slate-900 italic">新興傳染</span>
                 <span className="text-[10px] text-slate-400 font-bold uppercase">Emerging</span>
@@ -1806,17 +1707,25 @@ export default function App() {
                     />
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                       <div className="md:col-span-1 watercolor-card p-8 border-t-8 border-t-medical-green bg-white shadow-md">
-                        <h4 className="text-lg font-black text-medical-green mb-6 flex items-center gap-2">
+                        <h4 className="text-lg font-black text-medical-green mb-6 flex items-center gap-3">
+                           <div className="w-10 h-10 rounded-xl bg-medical-green/10 flex items-center justify-center">
+                             <Award className="text-medical-green" size={20} />
+                           </div>
                            主要目標
                         </h4>
                         <p className="text-black leading-relaxed font-black italic text-sm">{OBJECTIVES.primary.content}</p>
                       </div>
                       <div className="md:col-span-2 watercolor-card p-8 border-t-8 border-t-medical-blue bg-white shadow-md">
-                        <h4 className="text-lg font-black text-medical-blue mb-6">次要研究目標 (Secondary)</h4>
+                        <h4 className="text-lg font-black text-medical-blue mb-6 flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-medical-blue/10 flex items-center justify-center">
+                            <Layers className="text-medical-blue" size={20} />
+                          </div>
+                          次要研究目標 (Secondary)
+                        </h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {OBJECTIVES.secondary.map(obj => (
-                            <div key={obj.id} className="flex gap-3 text-xs text-black font-black bg-slate-50 p-4 rounded-xl border border-slate-100 italic">
-                              <span className="font-black text-medical-blue shrink-0">{obj.id}.</span>
+                            <div key={obj.id} className="flex gap-3 text-xs text-black font-black bg-slate-50 p-4 rounded-xl border border-slate-100 italic group hover:bg-medical-blue/5 transition-colors">
+                              <CheckCircle2 className="text-medical-blue shrink-0 group-hover:scale-110 transition-transform" size={14} />
                               {obj.content}
                             </div>
                           ))}
@@ -1839,17 +1748,22 @@ export default function App() {
                       subtitle="基於教學理論基礎預期的研究產出與效果。"
                     />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {HYPOTHESES.map((hyp) => (
-                        <div key={hyp.id} className="watercolor-card p-8 flex items-start gap-5 hover:border-medical-yellow transition-all">
-                          <div className="h-10 w-10 rounded-xl bg-medical-yellow/20 text-medical-yellow flex items-center justify-center font-bold text-lg shrink-0">
-                            {hyp.id}
+                      {HYPOTHESES.map((hyp) => {
+                        const hypIcons = [Zap, TrendingUp, RefreshCw, BarChart];
+                        const Icon = hypIcons[hyp.id - 1] || Lightbulb;
+                        return (
+                          <div key={hyp.id} className="watercolor-card p-8 flex items-start gap-5 hover:border-medical-yellow transition-all group">
+                            <div className="h-12 w-12 rounded-2xl bg-medical-yellow/20 text-medical-yellow flex items-center justify-center font-bold text-lg shrink-0 group-hover:bg-medical-yellow group-hover:text-white transition-all">
+                              <Icon size={24} />
+                            </div>
+                            <div>
+                              <div className="text-[10px] font-black text-medical-yellow uppercase tracking-widest mb-1">Hypothesis {hyp.id}</div>
+                              <h4 className="font-black text-slate-900 mb-2 text-lg">{hyp.title}</h4>
+                              <p className="text-sm text-slate-500 leading-relaxed font-medium">{hyp.content}</p>
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="font-bold text-slate-800 mb-2">{hyp.title}</h4>
-                            <p className="text-sm text-slate-500 leading-relaxed">{hyp.content}</p>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </motion.div>
                 )}
@@ -1945,7 +1859,7 @@ export default function App() {
                  <SectionHeader 
                    title="臨床照護里程碑 (Milestones)" 
                    icon={ClipboardCheck}
-                   subtitle="定義五個能級的表現基準，作為 CCC 委員會評核之依據。"
+                   subtitle="定義五個等級的表現基準，作為 CCC 委員會評核之依據。"
                  />
               </div>
 
@@ -1956,7 +1870,7 @@ export default function App() {
                       <th className="px-6 py-4 font-bold text-slate-800 text-sm">里程碑項目</th>
                       {[1, 2, 3, 4, 5].map(lvl => (
                         <th key={lvl} className={`px-4 py-4 font-bold text-sm text-center ${lvl === 3 ? 'text-medical-green' : 'text-slate-400'}`}>
-                          能級 {lvl}
+                          等級 {lvl}
                         </th>
                       ))}
                     </tr>
@@ -1984,82 +1898,179 @@ export default function App() {
 
               <div className="lg:col-span-12 mt-20">
                  <SectionHeader 
-                    title="教學評估與對應 (K-B-VR-Sim)" 
+                    title="能力建構輔助與教學對應 (K-B-VR-Sim)" 
                     icon={Layers}
-                    subtitle="展示各里程碑核心能力如何透過 K、B、VR 與整合模擬四個維度進行完整訓練對應。"
+                    subtitle="展示核心里程碑如何透過知識建構 (K)、技術實作 (B)、擬真認知 (VR) 與整合模擬 (Sim) 四階段完成能力轉化。"
                  />
 
-                 <div className="mb-12">
-                   <MilestoneMindMap />
-                 </div>
+                 <div className="mb-12 space-y-12">
+                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                     {/* 課程對應 (K) */}
+                     <div className="watercolor-card p-6 bg-white border-t-4 border-t-[#ffc000]">
+                       <h4 className="text-sm font-bold text-[#ffc000] mb-6 flex items-center gap-2">
+                         <School size={16} /> Knowledge (K)
+                       </h4>
+                       <div className="space-y-3">
+                         {COURSE_MAPPING.map((row) => (
+                           <div key={row.milestone} className="p-2.5 bg-slate-50 rounded-lg border border-slate-100">
+                             <div className="text-[9px] font-bold text-[#ffc000] uppercase mb-1">{row.milestone}</div>
+                             <div className="text-[11px] font-bold text-slate-700 leading-tight mb-1">{row.course}</div>
+                             <div className="text-[9px] text-slate-400 font-medium">{row.methods}</div>
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+  
+                     {/* 技術對應 (B) */}
+                     <div className="watercolor-card p-6 bg-white border-t-4 border-t-[#ed7d31]">
+                       <h4 className="text-sm font-bold text-[#ed7d31] mb-6 flex items-center gap-2">
+                         <Wrench size={16} /> Procedural (B)
+                       </h4>
+                       <div className="space-y-3">
+                         {TECHNIQUE_MAPPING.map((row) => (
+                           <div key={row.milestone} className="p-2.5 bg-slate-50 rounded-lg border border-slate-100">
+                             <div className="text-[9px] font-bold text-[#ed7d31] uppercase mb-1">{row.milestone}</div>
+                             <div className="text-[11px] font-bold text-slate-700 leading-tight mb-1">{row.technique}</div>
+                             <div className="text-[9px] text-slate-400 font-medium">工具：{row.tool}</div>
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+  
+                     {/* VR 對應 (VR) */}
+                     <div className="watercolor-card p-6 bg-white border-t-4 border-t-[#ed4848]">
+                       <h4 className="text-sm font-bold text-[#ed4848] mb-6 flex items-center gap-2">
+                         <Gamepad2 size={16} /> Cognitive (VR)
+                       </h4>
+                       <div className="space-y-3">
+                         {VR_MAPPING.map((row) => (
+                           <div key={row.milestone} className="p-2.5 bg-slate-50 rounded-lg border border-slate-100">
+                             <div className="text-[9px] font-bold text-[#ed4848] uppercase mb-1">{row.milestone}</div>
+                             <div className="text-[11px] font-bold text-slate-700 leading-tight mb-1">{row.scenario}</div>
+                             <div className="text-[9px] text-slate-400 font-medium">核心：{row.target}</div>
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+  
+                     {/* 整合模擬 (Sim) */}
+                     <div className="watercolor-card p-6 bg-white border-t-4 border-t-[#70ad47]">
+                       <h4 className="text-sm font-bold text-[#70ad47] mb-6 flex items-center gap-2">
+                         <Activity size={16} /> Integration (Sim)
+                       </h4>
+                       <div className="space-y-3">
+                         {INTEGRATED_SIM_MAPPING.map((row) => (
+                           <div key={row.milestone} className="p-2.5 bg-slate-50 rounded-lg border border-slate-100">
+                             <div className="text-[9px] font-bold text-[#70ad47] uppercase mb-1">{row.milestone}</div>
+                             <div className="text-[11px] font-bold text-slate-700 leading-tight">{row.sim}</div>
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+                   </div>
                  
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                   {/* 課程對應 (K) */}
-                   <div className="watercolor-card p-6 bg-white border-t-4 border-t-[#ffc000]">
-                     <h4 className="text-sm font-bold text-[#ffc000] mb-6 flex items-center gap-2">
-                       <School size={16} /> Knowledge (K)
-                     </h4>
-                     <div className="space-y-3">
-                       {COURSE_MAPPING.map((row) => (
-                         <div key={row.milestone} className="p-2.5 bg-slate-50 rounded-lg border border-slate-100">
-                           <div className="text-[9px] font-bold text-[#ffc000] uppercase mb-1">{row.milestone}</div>
-                           <div className="text-[11px] font-bold text-slate-700 leading-tight mb-1">{row.course}</div>
-                           <div className="text-[9px] text-slate-400 font-medium">{row.methods}</div>
-                         </div>
-                       ))}
-                     </div>
-                   </div>
+                 <div className="space-y-6">
+                    {MILESTONES.map((m) => {
+                      const kMap = COURSE_MAPPING.find(row => row.milestone.startsWith(m.id));
+                      const bMap = TECHNIQUE_MAPPING.find(row => row.milestone.startsWith(m.id));
+                      const vrMap = VR_MAPPING.find(row => row.milestone.startsWith(m.id));
+                      const simMap = INTEGRATED_SIM_MAPPING.find(row => row.milestone.startsWith(m.id));
 
-                   {/* 技術對應 (B) */}
-                   <div className="watercolor-card p-6 bg-white border-t-4 border-t-[#ed7d31]">
-                     <h4 className="text-sm font-bold text-[#ed7d31] mb-6 flex items-center gap-2">
-                       <Wrench size={16} /> Procedural (B)
-                     </h4>
-                     <div className="space-y-3">
-                       {TECHNIQUE_MAPPING.map((row) => (
-                         <div key={row.milestone} className="p-2.5 bg-slate-50 rounded-lg border border-slate-100">
-                           <div className="text-[9px] font-bold text-[#ed7d31] uppercase mb-1">{row.milestone}</div>
-                           <div className="text-[11px] font-bold text-slate-700 leading-tight mb-1">{row.technique}</div>
-                           <div className="text-[9px] text-slate-400 font-medium">工具：{row.tool}</div>
-                         </div>
-                       ))}
-                     </div>
-                   </div>
+                      return (
+                        <div key={m.id} className="watercolor-card bg-white overflow-hidden border-none shadow-xl hover:shadow-2xl transition-all group">
+                          <div className="flex flex-col lg:flex-row">
+                            {/* Milestone Header */}
+                            <div className="lg:w-64 bg-slate-900 p-8 flex flex-col justify-between text-white relative">
+                              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+                                <MilestoneIcon name={m.iconName} size={80} />
+                              </div>
+                              <div className="relative z-10">
+                                <div className="text-[10px] font-black text-medical-blue bg-medical-blue/20 px-2 py-0.5 rounded-full w-fit mb-4 tracking-widest">{m.id}</div>
+                                <h4 className="text-xl font-black leading-tight mb-2">{m.category}</h4>
+                              </div>
+                              <div className="relative z-10 flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                                <Activity size={12} /> Milestone Pathway
+                              </div>
+                            </div>
 
-                   {/* VR 對應 (VR) */}
-                   <div className="watercolor-card p-6 bg-white border-t-4 border-t-[#ed4848]">
-                     <h4 className="text-sm font-bold text-[#ed4848] mb-6 flex items-center gap-2">
-                       <Gamepad2 size={16} /> Cognitive (VR)
-                     </h4>
-                     <div className="space-y-3">
-                       {VR_MAPPING.map((row) => (
-                         <div key={row.milestone} className="p-2.5 bg-slate-50 rounded-lg border border-slate-100">
-                           <div className="text-[9px] font-bold text-[#ed4848] uppercase mb-1">{row.milestone}</div>
-                           <div className="text-[11px] font-bold text-slate-700 leading-tight mb-1">{row.scenario}</div>
-                           <div className="text-[9px] text-slate-400 font-medium">核心：{row.target}</div>
-                         </div>
-                       ))}
-                     </div>
-                   </div>
+                            {/* Mapping Matrix Rows */}
+                            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-slate-100">
+                              {/* Knowledge Column */}
+                              <div className="p-6 hover:bg-amber-50/50 transition-colors">
+                                <div className="flex items-center gap-2 text-[11px] font-black text-amber-500 mb-4 uppercase tracking-tighter">
+                                  <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center">
+                                    <BookOpen size={16} />
+                                  </div>
+                                  <span>Knowledge (K)</span>
+                                </div>
+                                {kMap ? (
+                                  <div className="space-y-1.5">
+                                    <div className="text-sm font-black text-slate-800 leading-tight">{kMap.course}</div>
+                                    <div className="text-[11px] text-slate-500 font-bold leading-relaxed">{kMap.methods}</div>
+                                  </div>
+                                ) : <div className="text-[11px] text-slate-300 italic font-medium">基礎知識建構</div>}
+                              </div>
 
-                   {/* 整合模擬 (Sim) */}
-                   <div className="watercolor-card p-6 bg-white border-t-4 border-t-[#70ad47]">
-                     <h4 className="text-sm font-bold text-[#70ad47] mb-6 flex items-center gap-2">
-                       <Activity size={16} /> Integration (Sim)
-                     </h4>
-                     <div className="space-y-3">
-                       {INTEGRATED_SIM_MAPPING.map((row) => (
-                         <div key={row.milestone} className="p-2.5 bg-slate-50 rounded-lg border border-slate-100">
-                           <div className="text-[9px] font-bold text-[#70ad47] uppercase mb-1">{row.milestone}</div>
-                           <div className="text-[11px] font-bold text-slate-700 leading-tight">{row.sim}</div>
-                         </div>
-                       ))}
-                     </div>
-                   </div>
+                              {/* Procedural Column */}
+                              <div className="p-6 hover:bg-orange-50/50 transition-colors">
+                                <div className="flex items-center gap-2 text-[11px] font-black text-orange-500 mb-4 uppercase tracking-tighter">
+                                  <div className="w-8 h-8 rounded-xl bg-orange-100 flex items-center justify-center">
+                                    <Wrench size={16} />
+                                  </div>
+                                  <span>Procedural (B)</span>
+                                </div>
+                                {bMap ? (
+                                  <div className="space-y-1.5">
+                                    <div className="text-sm font-black text-slate-800 leading-tight">{bMap.technique}</div>
+                                    <div className="text-[11px] text-slate-500 font-bold leading-relaxed">工具：{bMap.tool}</div>
+                                  </div>
+                                ) : <div className="text-[11px] text-slate-300 italic font-medium">技術實作練習</div>}
+                              </div>
+
+                              {/* VR Column */}
+                              <div className="p-6 hover:bg-red-50/50 transition-colors">
+                                <div className="flex items-center gap-2 text-[11px] font-black text-red-500 mb-4 uppercase tracking-tighter">
+                                  <div className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center">
+                                    <Gamepad2 size={16} />
+                                  </div>
+                                  <span>Cognitive (VR)</span>
+                                </div>
+                                {vrMap ? (
+                                  <div className="space-y-1.5">
+                                    <div className="text-sm font-black text-slate-800 leading-tight">{vrMap.scenario}</div>
+                                    <div className="text-[11px] text-slate-500 font-bold leading-relaxed">核心：{vrMap.target}</div>
+                                  </div>
+                                ) : <div className="text-[11px] text-slate-300 italic font-medium">擬真認知決策</div>}
+                              </div>
+
+                              {/* Sim Column */}
+                              <div className="p-6 hover:bg-green-50/50 transition-colors">
+                                <div className="flex items-center gap-2 text-[11px] font-black text-green-600 mb-4 uppercase tracking-tighter">
+                                  <div className="w-8 h-8 rounded-xl bg-green-100 flex items-center justify-center">
+                                    <Activity size={16} />
+                                  </div>
+                                  <span>Integration (Sim)</span>
+                                </div>
+                                {simMap ? (
+                                  <div className="space-y-1.5">
+                                    <div className="text-sm font-black text-slate-800 leading-tight">{simMap.sim}</div>
+                                    <div className="text-[11px] text-slate-400 font-bold flex items-center gap-1">
+                                      <CheckCircle2 size={12} className="text-green-500" />
+                                      實戰能力轉化
+                                    </div>
+                                  </div>
+                                ) : <div className="text-[11px] text-slate-300 italic font-medium">整合模擬演練</div>}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                  </div>
               </div>
-            </motion.div>
-          )}
+            </div>
+          </motion.div>
+        )}
 
           {activeTab === 'evaluation' && (
             <motion.div
@@ -2208,26 +2219,6 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      {/* 底部導覽懸浮窗 (適用於評審閱讀) */}
-      <div className="fixed bottom-10 left-0 right-0 z-[60] flex justify-center pointer-events-none px-8">
-         <motion.div 
-           initial={{ y: 100, opacity: 0 }}
-           animate={{ y: 0, opacity: 1 }}
-           className="bg-slate-900/90 text-white rounded-full px-8 py-5 shadow-2xl flex items-center gap-10 backdrop-blur-md pointer-events-auto border border-white/10"
-         >
-           <div className="flex items-center gap-3 border-r border-white/20 pr-10">
-             <div className="h-3 w-3 bg-medical-green rounded-full animate-pulse shadow-glow" />
-             <span className="text-[10px] font-bold tracking-[0.3em] uppercase opacity-90">互動進度報告</span>
-           </div>
-           <div className="flex items-center gap-6 text-xs">
-             <div className="flex flex-col">
-               <span className="opacity-50 text-[9px] uppercase font-bold tracking-widest mb-0.5">目前階段</span>
-               <span className="font-bold">Phase 2 追蹤評估中</span>
-             </div>
-             <ChevronRight size={16} className="text-slate-500" />
-           </div>
-         </motion.div>
-      </div>
     </div>
   );
 }
