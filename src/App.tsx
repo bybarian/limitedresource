@@ -1499,7 +1499,7 @@ export default function App() {
             className="flex items-center gap-3 mb-6"
           >
             <div className="h-px w-8 bg-medical-blue" />
-            <img src="/cathay_logo.png" alt="Cathay Logo" className="h-8 object-contain" referrerPolicy="no-referrer" />
+            <img src="cathay_logo.png" alt="Cathay Logo" className="h-8 object-contain" referrerPolicy="no-referrer" />
             <span className="text-medical-blue font-bold text-xs uppercase tracking-widest">
               Cathay General Hospital · 國泰綜合醫院教學部
             </span>
@@ -1516,7 +1516,7 @@ export default function App() {
                   <span>侷限醫療</span>
                   <div className="absolute right-0 top-full -translate-y-2/3 pointer-events-none">
                     <img 
-                      src="/ecg_line.png" 
+                      src="ecg_line.png" 
                       alt="ECG" 
                       className="h-32 md:h-48 object-contain opacity-[0.15]" 
                       referrerPolicy="no-referrer" 
@@ -1543,7 +1543,7 @@ export default function App() {
                 className="p-6 bg-white rounded-3xl shadow-xl border-l-8 border-l-blue-600 flex flex-col items-center text-center gap-2"
               >
                 <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl mb-2 w-16 h-16 flex items-center justify-center overflow-hidden">
-                  <img src="/disaster_icon.png" alt="災難應變" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                  <img src="disaster_icon.png" alt="災難應變" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                 </div>
                 <span className="text-sm font-black text-slate-900 italic">災難應變</span>
                 <span className="text-[10px] text-slate-400 font-bold uppercase">Disaster</span>
@@ -1554,7 +1554,7 @@ export default function App() {
                 className="p-6 bg-white rounded-3xl shadow-xl border-l-8 border-l-red-600 flex flex-col items-center text-center gap-2"
               >
                 <div className="p-3 bg-red-50 text-red-600 rounded-2xl mb-2 w-16 h-16 flex items-center justify-center overflow-hidden">
-                  <img src="/tactical_icon.png" alt="戰傷醫療" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                  <img src="tactical_icon.png" alt="戰傷醫療" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                 </div>
                 <span className="text-sm font-black text-slate-900 italic">戰傷醫療</span>
                 <span className="text-[10px] text-slate-400 font-bold uppercase">Tactical</span>
@@ -1565,7 +1565,7 @@ export default function App() {
                 className="p-6 bg-white rounded-3xl shadow-xl border-l-8 border-l-green-600 flex flex-col items-center text-center gap-2"
               >
                 <div className="p-3 bg-green-50 text-green-600 rounded-2xl mb-2 w-16 h-16 flex items-center justify-center overflow-hidden">
-                  <img src="/community_icon.png" alt="社區在宅" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                  <img src="community_icon.png" alt="社區在宅" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                 </div>
                 <span className="text-sm font-black text-slate-900 italic">社區在宅</span>
                 <span className="text-[10px] text-slate-400 font-bold uppercase">Community</span>
@@ -1576,7 +1576,7 @@ export default function App() {
                 className="p-6 bg-white rounded-3xl shadow-xl border-l-8 border-l-red-800 flex flex-col items-center text-center gap-2"
               >
                 <div className="p-3 bg-red-50 text-red-800 rounded-2xl mb-2 w-16 h-16 flex items-center justify-center overflow-hidden">
-                  <img src="/emerging_icon.png" alt="新興傳染" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                  <img src="emerging_icon.png" alt="新興傳染" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                 </div>
                 <span className="text-sm font-black text-slate-900 italic">新興傳染</span>
                 <span className="text-[10px] text-slate-400 font-bold uppercase">Emerging</span>
