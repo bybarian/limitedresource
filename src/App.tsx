@@ -1388,10 +1388,10 @@ export default function App() {
   }, []);
 
   const modules = [
-    { id: 'disaster', name: '災難應變', english: 'Disaster Support', icon: Wind, color: 'border-blue-600', image: '/disaster_icon.png' },
-    { id: 'tactical', name: '戰傷醫療', english: 'Combat Casualty', icon: ShieldAlert, color: 'border-red-600', image: '/tactical_icon.png' },
-    { id: 'community', name: '社區在宅', english: 'Home & Community', icon: Home, color: 'border-green-600', image: '/community_icon.png' },
-    { id: 'emerging', name: '新興傳染', english: 'Infectious Disease', icon: Biohazard, color: 'border-red-800', image: '/emerging_icon.png' },
+    { id: 'disaster', name: '災難應變', english: 'Disaster Support', icon: Wind, color: 'border-blue-600', image: 'disaster_icon.png' },
+    { id: 'tactical', name: '戰傷醫療', english: 'Combat Casualty', icon: ShieldAlert, color: 'border-red-600', image: 'tactical_icon.png' },
+    { id: 'community', name: '社區在宅', english: 'Home & Community', icon: Home, color: 'border-green-600', image: 'community_icon.png' },
+    { id: 'emerging', name: '新興傳染', english: 'Infectious Disease', icon: Biohazard, color: 'border-red-800', image: 'emerging_icon.png' },
   ];
 
   if (!selectedModule) {
